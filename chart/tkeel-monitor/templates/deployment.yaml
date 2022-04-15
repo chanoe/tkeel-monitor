@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tkeel-monitor.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    app: {{ include "tkeel-monitor.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "tkeel-monitor.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "tkeel-monitor.name" . }}
+    spec:
+      serviceAccountName: tkeel-manager
+      {{- if .imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .imagePullSecrets }}
+      {{- end }}
+      containers:
+        - name: {{ include "tkeel-monitor.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 31234
+          env:
+            - name: PROM_NAMESPACE
+              value: {{ .Values.prometheus_namespace }}

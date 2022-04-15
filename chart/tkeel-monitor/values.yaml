@@ -1,0 +1,22 @@
+kube-prometheus-stack:
+  enabled: false
+  ## NOTE: If you need to customize the installation of prometheus,
+  ## please see https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-operator
+  ## and add corresponding variables to cover.
+  ## If you do not install dependencies,
+  ## please specify the namespace installed
+  ## by prometheus and the corresponding configmap name
+  ## component enabled
+  grafana:
+    enabled: false
+
+prometheus_namespace: ""
+
+replicaCount: 1
+
+imagePullSecrets: ""
+
+image:
+  repository: tkeelio/tkeel-monitor
+  tag: latest
+  pullPolicy: Always

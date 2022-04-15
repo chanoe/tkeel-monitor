@@ -1,15 +1,15 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "api/helloworld/v1/error.proto",
+    "title": "api/openapi/v1/server.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "Greeter"
+      "name": "Openapi"
     },
     {
-      "name": "Openapi"
+      "name": "Prometheus"
     }
   ],
   "consumes": [
@@ -52,51 +52,6 @@
         ]
       }
     },
-    "/helloworld/{name}": {
-      "post": {
-        "summary": "Get a message.（服务描述）",
-        "operationId": "SayHello",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/v1HelloResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "name",
-            "description": "Description sample of helloworld's name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "description": "query filed",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "query filed",
-              "required": [
-                "query"
-              ]
-            }
-          }
-        ],
-        "tags": [
-          "Greeter"
-        ]
-      }
-    },
     "/identify": {
       "get": {
         "summary": "openapi identify",
@@ -117,6 +72,61 @@
         },
         "tags": [
           "Openapi"
+        ]
+      }
+    },
+    "/prometheus/{query}": {
+      "get": {
+        "summary": "query promehteus",
+        "operationId": "Query",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/v1QueryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "description": "query filed",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "st",
+            "description": "start_time",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "et",
+            "description": "end_time",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "step",
+            "description": "time step",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Prometheus"
         ]
       }
     },
@@ -337,16 +347,6 @@
       "default": "admin",
       "description": "console portal enum."
     },
-    "v1HelloResponse": {
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string",
-          "description": "Hello Response"
-        }
-      },
-      "title": "The response message containing the greetings"
-    },
     "v1IdentifyResponse": {
       "type": "object",
       "properties": {
@@ -462,6 +462,16 @@
       ],
       "default": "UNKNOWN",
       "description": "*\nplugin state enum."
+    },
+    "v1QueryResponse": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "string",
+          "description": "Hello Response"
+        }
+      },
+      "title": "The response message containing the greetings"
     },
     "v1Result": {
       "type": "object",
