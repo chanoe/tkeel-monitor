@@ -24,6 +24,7 @@ vendor/
 *.o
 *.a
 *.so
+./monitor*
 
 # OS General
 Thumbs.db
@@ -39,3 +40,4 @@ bin/
 .vscode/
 .idea/
 *.swp
+build*

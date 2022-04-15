@@ -4,8 +4,8 @@ import (
 	"context"
 
 	openapi_v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
-	v1 "github.com/tkeel-io/tkeel-template-go/api/openapi/v1"
-	"github.com/tkeel-io/tkeel-template-go/pkg/util"
+	v1 "github.com/tkeel-io/tkeel-monitor/api/openapi/v1"
+	"github.com/tkeel-io/tkeel-monitor/pkg/util"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -32,7 +32,7 @@ func (s *OpenapiService) AddonsIdentify(ctx context.Context, in *openapi_v1.Addo
 func (s *OpenapiService) Identify(ctx context.Context, in *emptypb.Empty) (*openapi_v1.IdentifyResponse, error) {
 	return &openapi_v1.IdentifyResponse{
 		Res:          util.GetV1ResultOK(),
-		PluginId:     "tkeel-hello",
+		PluginId:     "tkeel-monitor",
 		Version:      "v0.4.0",
 		TkeelVersion: "v0.4.0",
 	}, nil

@@ -20,7 +20,7 @@ We have a copy of our discussion process and results on why this template is sty
 
 ## 🔥 Light up
 
-If you have any suggestions or ideas, you are welcome to file an [Issue](https://github.com/tkeel-io/tkeel-template-go/issues ) at any time, we'll look forward to sharing them together to make the world a better place.
+If you have any suggestions or ideas, you are welcome to file an [Issue](https://github.com/tkeel-io/tkeel-monitor/issues ) at any time, we'll look forward to sharing them together to make the world a better place.
 
 **Thank you very much** for your `feedback` and `suggestions`!
 
@@ -28,7 +28,7 @@ If you have any suggestions or ideas, you are welcome to file an [Issue](https:/
 
 You may have many questions, and we will ensure that they are answered as soon as possible!
 
-| Social Platforms | Links |
-|:---|----|
-|email| tkeel@yunify.com|
-|Weibo| [@tkeel]()|
+| Social Platforms | Links            |
+| :--------------- | ---------------- |
+| email            | tkeel@yunify.com |
+| Weibo            | [@tkeel]()       |

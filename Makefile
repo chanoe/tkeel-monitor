@@ -31,7 +31,6 @@ api:
 		   --openapiv2_opt=allow_merge=true \
  	       --openapiv2_opt=logtostderr=true \
  	       --openapiv2_opt=json_names_for_fields=false \
- 	       --typescript_out=. \
 	       $(API_PROTO_FILES)
 
 .PHONY: build
