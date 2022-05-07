@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/emicklei/go-restful v2.15.0+incompatible
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus-operator/prometheus-operator/pkg/client v0.55.1

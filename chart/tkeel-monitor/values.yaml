@@ -10,7 +10,7 @@ kube-prometheus-stack:
   grafana:
     enabled: false
 
-prometheus_namespace: ""
+prometheus_namespace: "kubesphere-monitoring-system"
 
 replicaCount: 1
 

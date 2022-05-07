@@ -16,9 +16,8 @@ import (
 	"github.com/tkeel-io/tkeel-monitor/pkg/service"
 
 	// User import.
-	prometheus "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
-
 	openapi "github.com/tkeel-io/tkeel-monitor/api/openapi/v1"
+	prometheus "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
 )
 
 var (
@@ -32,6 +31,13 @@ var (
 	PromNamespace string
 	// PromCRDName string.
 	PromCRDName string
+
+	// KsAddr host:port
+	KsAddr string
+	// KsUsername
+	KsUsername string
+	// KsPwd
+	KsPwd string
 )
 
 func init() {
@@ -40,6 +46,10 @@ func init() {
 	flag.StringVar(&GRPCAddr, "grpc_addr", getEnvStr("GRPC_ADDR", ":31233"), "grpc listen address.")
 
 	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "tkeel-system"), "prometheus install namespace.")
+
+	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", "kubesphere.io"), "ks access addr.")
+	flag.StringVar(&KsUsername, "ks_username", getEnvStr("KS_USERNAME", "admin"), "ks access username.")
+	flag.StringVar(&KsPwd, "ks_pwd", getEnvStr("KS_PWD", "P@88w0rd"), "ks user pwd.")
 }
 
 func main() {
@@ -58,10 +68,14 @@ func main() {
 		serverList...,
 	)
 
-	{ // User service
+	{
+		// User service
 		ProSrv := service.NewPrometheusService(PromNamespace)
 		prometheus.RegisterPrometheusHTTPServer(httpSrv.Container, ProSrv)
 		prometheus.RegisterPrometheusServer(grpcSrv.GetServe(), ProSrv)
+
+		// ks metrics
+		prometheus.RegisterKSMetricsHTTPServer(httpSrv.Container)
 
 		OpenapiSrv := service.NewOpenapiService()
 		openapi.RegisterOpenapiHTTPServer(httpSrv.Container, OpenapiSrv)
