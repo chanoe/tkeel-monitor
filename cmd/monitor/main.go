@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/tkeel-io/tkeel-monitor/api/monitoring/v1"
+	"github.com/tkeel-io/tkeel-monitor/pkg/ksclient"
 	"os"
 	"os/signal"
 	"strconv"
@@ -38,6 +40,10 @@ var (
 	KsUsername string
 	// KsPwd
 	KsPwd string
+	// TKeel NS
+	TKeelNamespace string
+	// TKeel cluster
+	TKeelCluster string
 )
 
 func init() {
@@ -45,11 +51,13 @@ func init() {
 	flag.StringVar(&HTTPAddr, "http_addr", getEnvStr("HTTP_ADDR", ":31234"), "http listen address.")
 	flag.StringVar(&GRPCAddr, "grpc_addr", getEnvStr("GRPC_ADDR", ":31233"), "grpc listen address.")
 
-	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "tkeel-system"), "prometheus install namespace.")
+	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "keel-system"), "prometheus install namespace.")
 
-	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", "kubesphere.io"), "ks access addr.")
+	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", "http://192.168.100.6:30880"), "ks access addr.")
 	flag.StringVar(&KsUsername, "ks_username", getEnvStr("KS_USERNAME", "admin"), "ks access username.")
 	flag.StringVar(&KsPwd, "ks_pwd", getEnvStr("KS_PWD", "P@88w0rd"), "ks user pwd.")
+	flag.StringVar(&TKeelNamespace, "tkeel_namespace", getEnvStr("TKEEL_NAMESPACE", "dapr-system"), "tkeel k8s namespace.")
+	flag.StringVar(&TKeelCluster, "tkeel_cluster", getEnvStr("TKEEL_CLUSTER", "default"), "tkeel k8s cluster.")
 }
 
 func main() {
@@ -75,7 +83,15 @@ func main() {
 		prometheus.RegisterPrometheusServer(grpcSrv.GetServe(), ProSrv)
 
 		// ks metrics
-		prometheus.RegisterKSMetricsHTTPServer(httpSrv.Container)
+		ksCli := ksclient.NewKApisClient(ksclient.WithBaseTokenPath(KsAddr, ""),
+			ksclient.WithUsername(KsUsername),
+			ksclient.WithPwd(KsPwd),
+			ksclient.WithTkeelNS(TKeelNamespace),
+			ksclient.WithTkeelCluster(TKeelCluster))
+
+		ksCli.RestyClient.OnBeforeRequest(ksCli.TokenBeforeReq)
+		ksService := service.NewKsMetricsService(ksCli)
+		v1.RegisterKSMetricsHTTPServer(httpSrv.Container, ksService)
 
 		OpenapiSrv := service.NewOpenapiService()
 		openapi.RegisterOpenapiHTTPServer(httpSrv.Container, OpenapiSrv)

@@ -25,6 +25,7 @@ vendor/
 *.a
 *.so
 ./monitor*
+build.sh
 
 # OS General
 Thumbs.db
