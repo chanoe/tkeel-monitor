@@ -7,10 +7,8 @@ import (
 	"github.com/tkeel-io/tkeel-monitor/pkg/ksclient"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
-	"github.com/pkg/errors"
 	"github.com/tkeel-io/kit/app"
 	"github.com/tkeel-io/kit/log"
 	"github.com/tkeel-io/kit/transport"
@@ -32,7 +30,7 @@ var (
 	// PromNamespace string.
 	PromNamespace string
 	// PromCRDName string.
-	PromCRDName string
+	//PromCRDName string
 
 	// KsAddr host:port
 	KsAddr string
@@ -119,26 +117,26 @@ func getEnvStr(env string, defaultValue string) string {
 	return v
 }
 
-func getEnvBool(env string, defaultValue bool) bool {
-	v := os.Getenv(env)
-	if v == "" {
-		return defaultValue
-	}
-	ret, err := strconv.ParseBool(v)
-	if err != nil {
-		panic(errors.Wrapf(err, "get env(%s) bool", env))
-	}
-	return ret
-}
-
-func getEnvInt(env string, defaultValue int) int {
-	v := os.Getenv(env)
-	if v == "" {
-		return defaultValue
-	}
-	ret, err := strconv.Atoi(v)
-	if err != nil {
-		panic(errors.Wrapf(err, "get env(%s) int", env))
-	}
-	return ret
-}
+//func getEnvBool(env string, defaultValue bool) bool {
+//	v := os.Getenv(env)
+//	if v == "" {
+//		return defaultValue
+//	}
+//	ret, err := strconv.ParseBool(v)
+//	if err != nil {
+//		panic(errors.Wrapf(err, "get env(%s) bool", env))
+//	}
+//	return ret
+//}
+//
+//func getEnvInt(env string, defaultValue int) int {
+//	v := os.Getenv(env)
+//	if v == "" {
+//		return defaultValue
+//	}
+//	ret, err := strconv.Atoi(v)
+//	if err != nil {
+//		panic(errors.Wrapf(err, "get env(%s) int", env))
+//	}
+//	return ret
+//}

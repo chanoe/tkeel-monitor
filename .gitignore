@@ -25,6 +25,7 @@ vendor/
 *.a
 *.so
 ./monitor*
+monitor
 build.sh
 
 # OS General
@@ -42,3 +43,4 @@ bin/
 .idea/
 *.swp
 build*
+/monitor

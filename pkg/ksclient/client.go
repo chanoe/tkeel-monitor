@@ -120,7 +120,10 @@ func (c *KApisClient) TokenBeforeReq(client *resty.Client, request *resty.Reques
 		return errors.Wrap(err, "ks login")
 	}
 	resMap := make(map[string]interface{})
-	json.Unmarshal(res.Body(), &resMap)
+	err = json.Unmarshal(res.Body(), &resMap)
+	if err != nil {
+		return errors.Wrap(err, "marshal ks token response")
+	}
 	if resMap["status"] != nil {
 		return errors.New(resMap["message"].(string))
 	}

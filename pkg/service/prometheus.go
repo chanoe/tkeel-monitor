@@ -88,6 +88,10 @@ func (s *PrometheusService) Query(ctx context.Context, req *pb.QueryRequest) (*p
 	if warn != nil {
 		log.Warnf("query %s warn: %v", req, warn)
 	}
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
 	return &pb.QueryResponse{
 		Result: value.String(),
 	}, nil

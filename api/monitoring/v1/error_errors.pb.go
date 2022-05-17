@@ -11,34 +11,48 @@ import (
 // is compatible with the ego package it is being compiled against.
 const _ = errors.SupportPackageIsVersion1
 
-var resourceErrUnknown *errors.TError
-var resourceErrNotFound *errors.TError
-var resourceErrListMysql *errors.TError
-var resourceErrInfoMysql *errors.TError
+var monitoringErrUnknown *errors.TError
+var monitoringErrNotFound *errors.TError
+var monitoringErrInvalidArgument *errors.TError
+var monitoringErrInternal *errors.TError
+var monitoringErrKsMarshal *errors.TError
+var monitoringErrKsInvoke *errors.TError
 
 func init() {
-	resourceErrUnknown = errors.New(int(codes.Unknown), "monitoring.v1.RESOURCE_ERR_UNKNOWN", Error_RESOURCE_ERR_UNKNOWN.String())
-	errors.Register(resourceErrUnknown)
-	resourceErrNotFound = errors.New(int(codes.NotFound), "monitoring.v1.RESOURCE_ERR_NOT_FOUND", Error_RESOURCE_ERR_NOT_FOUND.String())
-	errors.Register(resourceErrNotFound)
-	resourceErrListMysql = errors.New(int(codes.Internal), "monitoring.v1.RESOURCE_ERR_LIST_MYSQL", Error_RESOURCE_ERR_LIST_MYSQL.String())
-	errors.Register(resourceErrListMysql)
-	resourceErrInfoMysql = errors.New(int(codes.Internal), "monitoring.v1.RESOURCE_ERR_INFO_MYSQL", Error_RESOURCE_ERR_INFO_MYSQL.String())
-	errors.Register(resourceErrInfoMysql)
+	monitoringErrUnknown = errors.New(int(codes.Unknown), "monitoring.v1.MONITORING_ERR_UNKNOWN", Error_MONITORING_ERR_UNKNOWN.String())
+	errors.Register(monitoringErrUnknown)
+	monitoringErrNotFound = errors.New(int(codes.NotFound), "monitoring.v1.MONITORING_ERR_NOT_FOUND", Error_MONITORING_ERR_NOT_FOUND.String())
+	errors.Register(monitoringErrNotFound)
+	monitoringErrInvalidArgument = errors.New(int(codes.InvalidArgument), "monitoring.v1.MONITORING_ERR_INVALID_ARGUMENT", Error_MONITORING_ERR_INVALID_ARGUMENT.String())
+	errors.Register(monitoringErrInvalidArgument)
+	monitoringErrInternal = errors.New(int(codes.Internal), "monitoring.v1.MONITORING_ERR_INTERNAL", Error_MONITORING_ERR_INTERNAL.String())
+	errors.Register(monitoringErrInternal)
+	monitoringErrKsMarshal = errors.New(int(codes.Internal), "monitoring.v1.MONITORING_ERR_KS_MARSHAL", Error_MONITORING_ERR_KS_MARSHAL.String())
+	errors.Register(monitoringErrKsMarshal)
+	monitoringErrKsInvoke = errors.New(int(codes.Internal), "monitoring.v1.MONITORING_ERR_KS_INVOKE", Error_MONITORING_ERR_KS_INVOKE.String())
+	errors.Register(monitoringErrKsInvoke)
 }
 
-func ResourceErrUnknown() errors.Error {
-	return resourceErrUnknown
+func MonitoringErrUnknown() errors.Error {
+	return monitoringErrUnknown
 }
 
-func ResourceErrNotFound() errors.Error {
-	return resourceErrNotFound
+func MonitoringErrNotFound() errors.Error {
+	return monitoringErrNotFound
 }
 
-func ResourceErrListMysql() errors.Error {
-	return resourceErrListMysql
+func MonitoringErrInvalidArgument() errors.Error {
+	return monitoringErrInvalidArgument
 }
 
-func ResourceErrInfoMysql() errors.Error {
-	return resourceErrInfoMysql
+func MonitoringErrInternal() errors.Error {
+	return monitoringErrInternal
+}
+
+func MonitoringErrKsMarshal() errors.Error {
+	return monitoringErrKsMarshal
+}
+
+func MonitoringErrKsInvoke() errors.Error {
+	return monitoringErrKsInvoke
 }

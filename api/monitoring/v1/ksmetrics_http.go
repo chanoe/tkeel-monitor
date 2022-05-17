@@ -47,33 +47,49 @@ func (s *KSMetricsServer) MetricsPlugins(req *go_restful.Request, resp *go_restf
 	res, err := s.ksSvc.MetricsPlugins(req.QueryParameter("name"),
 		req.QueryParameter("status"),
 		req.QueryParameter("order_by"),
+		func() string {
+			if req.QueryParameter(" is_descending") != "true" {
+				return "true"
+			}
+			return ""
+		}(),
 		req.QueryParameter("page_size"),
 		req.QueryParameter("page_num"))
 	if err != nil {
 		log.Error(err)
-		tErr := errors.FromError(err)
+		tErr := errors.FromError(MonitoringErrInternal())
 		httpCode := errors.GRPCToHTTPStatusCode(tErr.GRPCStatus().Code())
-		if httpCode == http.StatusMovedPermanently {
-			resp.Header().Set("Location", tErr.Message)
-		}
 		resp.WriteHeaderAndJson(httpCode,
 			result.Set(tErr.Reason, tErr.Message, res), "application/json")
 		return
 	}
 
-	resData := make(map[string]interface{})
+	resData := DeploymentPlugins{}
 	err = json.Unmarshal(res, &resData)
 	if err != nil {
 		log.Error(err)
 		tErr := errors.FromError(err)
 		httpCode := errors.GRPCToHTTPStatusCode(tErr.GRPCStatus().Code())
-		if httpCode == http.StatusMovedPermanently {
-			resp.Header().Set("Location", tErr.Message)
-		}
 		resp.WriteHeaderAndJson(httpCode,
 			result.Set(tErr.Reason, tErr.Message, res), "application/json")
 		return
 	}
+	for i := range resData.Items {
+		if resData.Items[i].Status.Replicas == 0 {
+			resData.Items[i].Status.Status = "stopped"
+		} else if resData.Items[i].Status.Replicas == resData.Items[i].Status.AvailableReplicas {
+			resData.Items[i].Status.Status = "running"
+		} else {
+			resData.Items[i].Status.Status = "updating"
+		}
+		for condI := range resData.Items[i].Status.Conditions {
+			if resData.Items[i].Status.Conditions[condI].Type == "Available" {
+				resData.Items[i].Status.UpdateTime = resData.Items[i].Status.Conditions[condI].LastUpdateTime.UnixMilli()
+				break
+			}
+		}
+	}
+
 	resp.WriteHeaderAndJson(http.StatusOK,
 		result.Set(errors.Success.Reason, "", resData), "application/json")
 	return
@@ -92,7 +108,7 @@ func (s *KSMetricsServer) PluginPods(req *go_restful.Request, resp *go_restful.R
 			result.Set(tErr.Reason, tErr.Message, res), "application/json")
 		return
 	}
-	resData := make(map[string]interface{})
+	resData := PluginPods{}
 	err = json.Unmarshal(res, &resData)
 	if err != nil {
 		log.Error(err)
