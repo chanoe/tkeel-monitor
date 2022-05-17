@@ -40,7 +40,7 @@ const (
 	// 序列化ks数据错误
 	// @code=INTERNAL
 	Error_MONITORING_ERR_KS_MARSHAL Error = 4
-	// 序列化ks数据错误
+	// ks接口错误
 	// @code=INTERNAL
 	Error_MONITORING_ERR_KS_INVOKE Error = 5
 )

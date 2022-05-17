@@ -116,14 +116,8 @@ func (c *KApisClient) TokenBeforeReq(client *resty.Client, request *resty.Reques
 	res, err := resty.New().SetRedirectPolicy(resty.FlexibleRedirectPolicy(15)).SetCookieJar(cookieJar).R().
 		SetFormData(map[string]string{"username": c.username, "encrypt": c.pwd}).
 		Post(c.BaseURL + c.TokenPath)
-	if err != nil {
-		return errors.Wrap(err, "ks login")
-	}
 	resMap := make(map[string]interface{})
-	err = json.Unmarshal(res.Body(), &resMap)
-	if err != nil {
-		return errors.Wrap(err, "marshal ks token response")
-	}
+	json.Unmarshal(res.Body(), &resMap)
 	if resMap["status"] != nil {
 		return errors.New(resMap["message"].(string))
 	}

@@ -38,6 +38,7 @@ func (svc KsMetricsService) PluginPods(plugin string) ([]byte, error) {
 	res, err := svc.kapiCli.RestyClient.R().
 		SetQueryParams(parsePodsQuery(plugin)).
 		Get(svc.kapiCli.BaseURL + fmt.Sprintf(KSPATH_V1ALPHA3_PODS, svc.kapiCli.TKNameSpace))
+	log.Debug(res.Request.URL)
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -84,7 +85,13 @@ func parsePodsQuery(plugin string) map[string]string {
 	q := make(map[string]string)
 	q["ownerKind"] = "ReplicaSet"
 	q["sortBy"] = "startTime"
-	q["labelSelector"] = fmt.Sprintf("app=%s", plugin)
+	labelSelector := ""
+	if plugin == "tkeel-device" {
+		labelSelector = fmt.Sprintf("app.kubernetes.io/instance=%s,app.kubernetes.io/name=%s", plugin, plugin)
+	} else {
+		labelSelector = fmt.Sprintf("app=%s", plugin)
+	}
+	q["labelSelector"] = labelSelector
 	return q
 }
 
