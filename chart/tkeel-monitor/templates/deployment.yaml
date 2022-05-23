@@ -29,3 +29,13 @@ spec:
           env:
             - name: PROM_NAMESPACE
               value: {{ .Values.prometheus_namespace }}
+            - name: KS_ADDR
+              value: {{ .Values.ksAddr }}
+            - name: KS_USERNAME
+              value: {{ .Values.ksUsername }}
+            - name: KS_PWD
+              value: {{ .Values.ksPwd}}
+            - name: TKEEL_NAMESPACE
+              value: {{ .Release.Namespace | quote }}
+            - name: TKEEL_CLUSTER
+              value: {{ .Values.tkCluster }}

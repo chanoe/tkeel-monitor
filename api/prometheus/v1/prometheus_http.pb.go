@@ -46,11 +46,6 @@ func (h *PrometheusHTTPHandler) Query(req *go_restful.Request, resp *go_restful.
 			result.Set(errors.InternalError.Reason, err.Error(), nil), "application/json")
 		return
 	}
-	if err := transportHTTP.GetPathValue(req, &in); err != nil {
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			result.Set(errors.InternalError.Reason, err.Error(), nil), "application/json")
-		return
-	}
 
 	ctx := transportHTTP.ContextWithHeader(req.Request.Context(), req.Request.Header)
 
@@ -116,6 +111,6 @@ func RegisterPrometheusHTTPServer(container *go_restful.Container, srv Prometheu
 	}
 
 	handler := newPrometheusHTTPHandler(srv)
-	ws.Route(ws.GET("/prometheus/{query}").
+	ws.Route(ws.GET("/prometheus").
 		To(handler.Query))
 }

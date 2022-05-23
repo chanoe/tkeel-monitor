@@ -60,8 +60,25 @@ message QueryRequest {
 
 // The response message containing the greetings
 message QueryResponse {
-  string result = 1
+  MetricsData result = 1
       [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
         description : "Hello Response"
       } ];
+}
+
+
+message MetricsData {
+  string result_type =1 ;
+  repeated MetricValue result =2;
+}
+
+message MetricValue {
+  map<string,string> metric =1;
+  Point value =2;
+  repeated Point values = 3;
+}
+
+message Point {
+   double timestamp =1 ;
+   double value =2;
 }

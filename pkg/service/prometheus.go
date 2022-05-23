@@ -10,6 +10,7 @@ import (
 	"github.com/prometheus/common/model"
 	"github.com/tkeel-io/kit/log"
 	pb "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
+	mprom "github.com/tkeel-io/tkeel-monitor/pkg/model/prometheus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
@@ -17,7 +18,6 @@ import (
 type PrometheusService struct {
 	mc   *v1.MonitoringV1Client
 	pAPI promv1.API
-	pb.UnimplementedPrometheusServer
 }
 
 func NewPrometheusService(namespace string) *PrometheusService {
@@ -51,7 +51,6 @@ func NewPrometheusService(namespace string) *PrometheusService {
 		log.Fatalf("new prometheus client err: %s", err)
 	}
 	pAPI := promv1.NewAPI(pc)
-	pAPI.Buildinfo(context.TODO())
 	res, err := pAPI.Buildinfo(context.TODO())
 	if err != nil {
 		log.Errorf("new prometheus api build.info err: %s", err)
@@ -65,18 +64,31 @@ func NewPrometheusService(namespace string) *PrometheusService {
 
 func (s *PrometheusService) Query(ctx context.Context, req *pb.QueryRequest) (*pb.QueryResponse, error) {
 	var (
-		value model.Value
-		warn  promv1.Warnings
-		err   error
+		value       model.Value
+		warn        promv1.Warnings
+		err         error
+		metricsData *pb.MetricsData
 	)
 	st := time.Unix(req.GetSt(), 0)
 	et := time.Unix(req.GetEt(), 0)
 	if req.GetStep() == "" {
-		value, warn, err = s.pAPI.Query(ctx, req.GetQuery(), st)
+		value, warn, err = s.pAPI.Query(ctx, req.GetQuery(), et)
+		if warn != nil {
+			log.Warnf("query %s warn: %v", req, warn)
+		}
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		metricsData = mprom.Parse2pbQueryResp(value, nil)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 	} else {
 		step, err1 := time.ParseDuration(req.GetStep())
 		if err1 != nil {
-			log.Errorf("time step parse err: %s", err)
+			log.Errorf("time step parse err: %s", err1)
 			return nil, pb.ResourceErrUnknown()
 		}
 		value, warn, err = s.pAPI.QueryRange(ctx, req.GetQuery(), promv1.Range{
@@ -84,11 +96,20 @@ func (s *PrometheusService) Query(ctx context.Context, req *pb.QueryRequest) (*p
 			End:   et,
 			Step:  step,
 		})
-	}
-	if warn != nil {
-		log.Warnf("query %s warn: %v", req, warn)
+		if warn != nil {
+			log.Warnf("query range %s warn: %v", req, warn)
+		}
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		metricsData = mprom.Parse2pbQueryRangeResp(value, nil)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
 	}
 	return &pb.QueryResponse{
-		Result: value.String(),
+		Result: metricsData,
 	}, nil
 }

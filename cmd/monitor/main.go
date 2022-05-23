@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/tkeel-io/tkeel-monitor/api/monitoring/v1"
+	"github.com/tkeel-io/tkeel-monitor/pkg/ksclient"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
-	"github.com/pkg/errors"
 	"github.com/tkeel-io/kit/app"
 	"github.com/tkeel-io/kit/log"
 	"github.com/tkeel-io/kit/transport"
@@ -16,9 +16,8 @@ import (
 	"github.com/tkeel-io/tkeel-monitor/pkg/service"
 
 	// User import.
-	prometheus "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
-
 	openapi "github.com/tkeel-io/tkeel-monitor/api/openapi/v1"
+	prometheusv1 "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
 )
 
 var (
@@ -31,7 +30,18 @@ var (
 	// PromNamespace string.
 	PromNamespace string
 	// PromCRDName string.
-	PromCRDName string
+	//PromCRDName string
+
+	// KsAddr host:port
+	KsAddr string
+	// KsUsername
+	KsUsername string
+	// KsPwd
+	KsPwd string
+	// TKeel NS
+	TKeelNamespace string
+	// TKeel cluster
+	TKeelCluster string
 )
 
 func init() {
@@ -39,7 +49,13 @@ func init() {
 	flag.StringVar(&HTTPAddr, "http_addr", getEnvStr("HTTP_ADDR", ":31234"), "http listen address.")
 	flag.StringVar(&GRPCAddr, "grpc_addr", getEnvStr("GRPC_ADDR", ":31233"), "grpc listen address.")
 
-	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "tkeel-system"), "prometheus install namespace.")
+	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "keel-system"), "prometheusv1 install namespace.")
+
+	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", "http://192.168.100.6:30880"), "ks access addr.")
+	flag.StringVar(&KsUsername, "ks_username", getEnvStr("KS_USERNAME", "admin"), "ks access username.")
+	flag.StringVar(&KsPwd, "ks_pwd", getEnvStr("KS_PWD", "P@88w0rd"), "ks user pwd.")
+	flag.StringVar(&TKeelNamespace, "tkeel_namespace", getEnvStr("TKEEL_NAMESPACE", "dapr-system"), "tkeel k8s namespace.")
+	flag.StringVar(&TKeelCluster, "tkeel_cluster", getEnvStr("TKEEL_CLUSTER", "default"), "tkeel k8s cluster.")
 }
 
 func main() {
@@ -58,10 +74,22 @@ func main() {
 		serverList...,
 	)
 
-	{ // User service
-		ProSrv := service.NewPrometheusService(PromNamespace)
-		prometheus.RegisterPrometheusHTTPServer(httpSrv.Container, ProSrv)
-		prometheus.RegisterPrometheusServer(grpcSrv.GetServe(), ProSrv)
+	{
+		// User service
+		promSvc := service.NewPrometheusService(PromNamespace)
+		prometheusv1.RegisterPrometheusHTTPServer(httpSrv.Container, promSvc)
+
+		// ks metrics
+		ksCli := ksclient.NewKApisClient(ksclient.WithBaseTokenPath(KsAddr, ""),
+			ksclient.WithUsername(KsUsername),
+			ksclient.WithPwd(KsPwd),
+			ksclient.WithTkeelNS(TKeelNamespace),
+			ksclient.WithTkeelCluster(TKeelCluster))
+
+		ksCli.RestyClient.OnBeforeRequest(ksCli.TokenBeforeReq)
+		ksSvc := service.NewKsMetricsService(ksCli)
+		ksSrv := v1.NewKSMetricsServer(ksSvc)
+		v1.RegisterKSMetricsHTTPServer(httpSrv.Container, ksSrv)
 
 		OpenapiSrv := service.NewOpenapiService()
 		openapi.RegisterOpenapiHTTPServer(httpSrv.Container, OpenapiSrv)
@@ -89,26 +117,26 @@ func getEnvStr(env string, defaultValue string) string {
 	return v
 }
 
-func getEnvBool(env string, defaultValue bool) bool {
-	v := os.Getenv(env)
-	if v == "" {
-		return defaultValue
-	}
-	ret, err := strconv.ParseBool(v)
-	if err != nil {
-		panic(errors.Wrapf(err, "get env(%s) bool", env))
-	}
-	return ret
-}
-
-func getEnvInt(env string, defaultValue int) int {
-	v := os.Getenv(env)
-	if v == "" {
-		return defaultValue
-	}
-	ret, err := strconv.Atoi(v)
-	if err != nil {
-		panic(errors.Wrapf(err, "get env(%s) int", env))
-	}
-	return ret
-}
+//func getEnvBool(env string, defaultValue bool) bool {
+//	v := os.Getenv(env)
+//	if v == "" {
+//		return defaultValue
+//	}
+//	ret, err := strconv.ParseBool(v)
+//	if err != nil {
+//		panic(errors.Wrapf(err, "get env(%s) bool", env))
+//	}
+//	return ret
+//}
+//
+//func getEnvInt(env string, defaultValue int) int {
+//	v := os.Getenv(env)
+//	if v == "" {
+//		return defaultValue
+//	}
+//	ret, err := strconv.Atoi(v)
+//	if err != nil {
+//		panic(errors.Wrapf(err, "get env(%s) int", env))
+//	}
+//	return ret
+//}
