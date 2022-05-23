@@ -38,7 +38,6 @@ func (svc KsMetricsService) PluginPods(plugin string) ([]byte, error) {
 	res, err := svc.kapiCli.RestyClient.R().
 		SetQueryParams(parsePodsQuery(plugin)).
 		Get(svc.kapiCli.BaseURL + fmt.Sprintf(KSPATH_V1ALPHA3_PODS, svc.kapiCli.TKNameSpace))
-	log.Debug(res.Request.URL)
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -86,11 +85,20 @@ func parsePodsQuery(plugin string) map[string]string {
 	q["ownerKind"] = "ReplicaSet"
 	q["sortBy"] = "startTime"
 	labelSelector := ""
-	if plugin == "tkeel-device" {
+	switch plugin {
+	case "tkeel-device":
 		labelSelector = fmt.Sprintf("app.kubernetes.io/instance=%s,app.kubernetes.io/name=%s", plugin, plugin)
-	} else {
+	case "tkeel-middleware-nginx-ingress-controller-default-backend":
+		labelSelector = "app.kubernetes.io/component=default-backend,app.kubernetes.io/instance=tkeel-middleware,app.kubernetes.io/name=nginx-ingress-controller"
+	case "tkeel-middleware-nginx-ingress-controller":
+		labelSelector = "app.kubernetes.io/component=controller,app.kubernetes.io/instance=tkeel-middleware,app.kubernetes.io/name=nginx-ingress-controller"
+	case "tkeel-core-influxdb":
+		labelSelector = "app.kubernetes.io/component=influxdb,app.kubernetes.io/instance=tkeel-core,app.kubernetes.io/name=influxdb"
+	default:
 		labelSelector = fmt.Sprintf("app=%s", plugin)
+
 	}
+
 	q["labelSelector"] = labelSelector
 	return q
 }

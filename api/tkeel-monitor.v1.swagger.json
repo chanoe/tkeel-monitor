@@ -425,6 +425,40 @@
       },
       "description": "*\nmessage plugin implemented other plugin."
     },
+    "v1MetricValue": {
+      "type": "object",
+      "properties": {
+        "metric": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "value": {
+          "$ref": "#/definitions/v1Point"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1Point"
+          }
+        }
+      }
+    },
+    "v1MetricsData": {
+      "type": "object",
+      "properties": {
+        "result_type": {
+          "type": "string"
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1MetricValue"
+          }
+        }
+      }
+    },
     "v1Permission": {
       "type": "object",
       "properties": {
@@ -463,11 +497,24 @@
       "default": "UNKNOWN",
       "description": "*\nplugin state enum."
     },
+    "v1Point": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "number",
+          "format": "double"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "v1QueryResponse": {
       "type": "object",
       "properties": {
         "result": {
-          "type": "string",
+          "$ref": "#/definitions/v1MetricsData",
           "description": "Hello Response"
         }
       },

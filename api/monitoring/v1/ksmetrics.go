@@ -6,6 +6,15 @@ type DeploymentPlugins struct {
 	Items      []PluginItems `json:"items"`
 	TotalItems int           `json:"totalItems"`
 }
+
+type PluginsOnlyStatus struct {
+	Items []PluginOnlyStatus `json:"items"`
+}
+type PluginOnlyStatus struct {
+	Uid    string `json:"uid"`
+	Status string `json:"status"`
+}
+
 type PluginMetadata struct {
 	Name string `json:"name"`
 	UID  string `json:"uid"`
@@ -39,6 +48,7 @@ type PluginPods struct {
 
 type PodResult struct {
 	Metadata PodsMetadata `json:"metadata"`
+	Spec     PodsSpec     `json:"spec"`
 	Status   PodsStatus   `json:"status"`
 }
 type PodsMetadata struct {
@@ -50,4 +60,8 @@ type PodsStatus struct {
 	HostIP    string    `json:"hostIP"`
 	PodIP     string    `json:"podIP"`
 	StartTime time.Time `json:"startTime"`
+}
+
+type PodsSpec struct {
+	NodeName string `json:"nodeName"`
 }

@@ -17,7 +17,7 @@ import (
 
 	// User import.
 	openapi "github.com/tkeel-io/tkeel-monitor/api/openapi/v1"
-	prometheus "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
+	prometheusv1 "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
 )
 
 var (
@@ -49,7 +49,7 @@ func init() {
 	flag.StringVar(&HTTPAddr, "http_addr", getEnvStr("HTTP_ADDR", ":31234"), "http listen address.")
 	flag.StringVar(&GRPCAddr, "grpc_addr", getEnvStr("GRPC_ADDR", ":31233"), "grpc listen address.")
 
-	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "keel-system"), "prometheus install namespace.")
+	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "keel-system"), "prometheusv1 install namespace.")
 
 	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", "http://192.168.100.6:30880"), "ks access addr.")
 	flag.StringVar(&KsUsername, "ks_username", getEnvStr("KS_USERNAME", "admin"), "ks access username.")
@@ -76,9 +76,8 @@ func main() {
 
 	{
 		// User service
-		ProSrv := service.NewPrometheusService(PromNamespace)
-		prometheus.RegisterPrometheusHTTPServer(httpSrv.Container, ProSrv)
-		prometheus.RegisterPrometheusServer(grpcSrv.GetServe(), ProSrv)
+		promSvc := service.NewPrometheusService(PromNamespace)
+		prometheusv1.RegisterPrometheusHTTPServer(httpSrv.Container, promSvc)
 
 		// ks metrics
 		ksCli := ksclient.NewKApisClient(ksclient.WithBaseTokenPath(KsAddr, ""),
@@ -88,8 +87,9 @@ func main() {
 			ksclient.WithTkeelCluster(TKeelCluster))
 
 		ksCli.RestyClient.OnBeforeRequest(ksCli.TokenBeforeReq)
-		ksService := service.NewKsMetricsService(ksCli)
-		v1.RegisterKSMetricsHTTPServer(httpSrv.Container, ksService)
+		ksSvc := service.NewKsMetricsService(ksCli)
+		ksSrv := v1.NewKSMetricsServer(ksSvc)
+		v1.RegisterKSMetricsHTTPServer(httpSrv.Container, ksSrv)
 
 		OpenapiSrv := service.NewOpenapiService()
 		openapi.RegisterOpenapiHTTPServer(httpSrv.Container, OpenapiSrv)

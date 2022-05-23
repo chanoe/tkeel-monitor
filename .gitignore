@@ -26,7 +26,7 @@ vendor/
 *.so
 ./monitor*
 monitor
-build.sh
+zlocal/build.sh
 
 # OS General
 Thumbs.db
@@ -42,5 +42,6 @@ bin/
 .vscode/
 .idea/
 *.swp
-build*
+zlocal/build.sh
+zlocal
 /monitor

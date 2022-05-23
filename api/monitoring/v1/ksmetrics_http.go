@@ -13,7 +13,7 @@ import (
 	"github.com/tkeel-io/tkeel-monitor/pkg/service"
 )
 
-func RegisterKSMetricsHTTPServer(container *go_restful.Container, ksSvc service.KsMetricsService) {
+func RegisterKSMetricsHTTPServer(container *go_restful.Container, srv *KSMetricsServer) {
 	var ws *go_restful.WebService
 	for _, v := range container.RegisteredWebServices() {
 		if v.RootPath() == "/v1" {
@@ -27,7 +27,6 @@ func RegisterKSMetricsHTTPServer(container *go_restful.Container, ksSvc service.
 		container.Add(ws)
 	}
 
-	srv := NewKSMetricsServer(ksSvc)
 	ws.Route(ws.GET("/monitoring/plugins").
 		To(srv.MetricsPlugins))
 	ws.Route(ws.GET("/monitoring/plugins/pods").
@@ -89,7 +88,15 @@ func (s *KSMetricsServer) MetricsPlugins(req *go_restful.Request, resp *go_restf
 			}
 		}
 	}
-
+	if req.QueryParameter("only_status") != "" {
+		resStatus := &PluginsOnlyStatus{Items: make([]PluginOnlyStatus, resData.TotalItems)}
+		for i := range resData.Items {
+			resStatus.Items[i] = PluginOnlyStatus{Uid: resData.Items[i].Metadata.UID, Status: resData.Items[i].Status.Status}
+		}
+		resp.WriteHeaderAndJson(http.StatusOK,
+			result.Set(errors.Success.Reason, "", resStatus), "application/json")
+		return
+	}
 	resp.WriteHeaderAndJson(http.StatusOK,
 		result.Set(errors.Success.Reason, "", resData), "application/json")
 	return
@@ -134,11 +141,12 @@ func (s *KSMetricsServer) PodsCpuMem(req *go_restful.Request, resp *go_restful.R
 		times = req.QueryParameter("times")
 	)
 	now := time.Now().Unix()
-	thirtyMAgo := now - 1800
+	twoAndHalfMinutesAgo := now - 150
+	//thirtyMAgo := now - 1800
 	if start == "" {
-		start = strconv.FormatInt(thirtyMAgo, 10)
+		start = strconv.FormatInt(twoAndHalfMinutesAgo, 10)
 		end = strconv.FormatInt(now, 10)
-		step = "60s"
+		step = "5s"
 		times = "30"
 	}
 	res, err := s.ksSvc.PodsCpuMem(req.QueryParameter("plugin"), req.QueryParameter("resources"), start, end, step, times)
