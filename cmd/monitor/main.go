@@ -34,10 +34,6 @@ var (
 
 	// KsAddr host:port
 	KsAddr string
-	// KsUsername
-	KsUsername string
-	// KsPwd
-	KsPwd string
 	// TKeel NS
 	TKeelNamespace string
 	// TKeel cluster
@@ -51,9 +47,7 @@ func init() {
 
 	flag.StringVar(&PromNamespace, "prom_namespace", getEnvStr("PROM_NAMESPACE", "keel-system"), "prometheusv1 install namespace.")
 
-	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", "http://192.168.100.6:30880"), "ks access addr.")
-	flag.StringVar(&KsUsername, "ks_username", getEnvStr("KS_USERNAME", "admin"), "ks access username.")
-	flag.StringVar(&KsPwd, "ks_pwd", getEnvStr("KS_PWD", "P@88w0rd"), "ks user pwd.")
+	flag.StringVar(&KsAddr, "ks_addr", getEnvStr("KS_ADDR", ""), "ks access addr.")
 	flag.StringVar(&TKeelNamespace, "tkeel_namespace", getEnvStr("TKEEL_NAMESPACE", "dapr-system"), "tkeel k8s namespace.")
 	flag.StringVar(&TKeelCluster, "tkeel_cluster", getEnvStr("TKEEL_CLUSTER", "default"), "tkeel k8s cluster.")
 }
@@ -75,18 +69,17 @@ func main() {
 	)
 
 	{
-		// User service
+		// prom service
 		promSvc := service.NewPrometheusService(PromNamespace)
 		prometheusv1.RegisterPrometheusHTTPServer(httpSrv.Container, promSvc)
 
 		// ks metrics
 		ksCli := ksclient.NewKApisClient(ksclient.WithBaseTokenPath(KsAddr, ""),
-			ksclient.WithUsername(KsUsername),
-			ksclient.WithPwd(KsPwd),
-			ksclient.WithTkeelNS(TKeelNamespace),
-			ksclient.WithTkeelCluster(TKeelCluster))
+			ksclient.WithKSNameSpace(""),
+			ksclient.WithTKeelNS(TKeelNamespace),
+			ksclient.WithTKeelCluster(TKeelCluster))
 
-		ksCli.RestyClient.OnBeforeRequest(ksCli.TokenBeforeReq)
+		ksCli.RestyClient.OnBeforeRequest(ksCli.SecretTokenBeforeReq)
 		ksSvc := service.NewKsMetricsService(ksCli)
 		ksSrv := v1.NewKSMetricsServer(ksSvc)
 		v1.RegisterKSMetricsHTTPServer(httpSrv.Container, ksSrv)
@@ -116,27 +109,3 @@ func getEnvStr(env string, defaultValue string) string {
 	}
 	return v
 }
-
-//func getEnvBool(env string, defaultValue bool) bool {
-//	v := os.Getenv(env)
-//	if v == "" {
-//		return defaultValue
-//	}
-//	ret, err := strconv.ParseBool(v)
-//	if err != nil {
-//		panic(errors.Wrapf(err, "get env(%s) bool", env))
-//	}
-//	return ret
-//}
-//
-//func getEnvInt(env string, defaultValue int) int {
-//	v := os.Getenv(env)
-//	if v == "" {
-//		return defaultValue
-//	}
-//	ret, err := strconv.Atoi(v)
-//	if err != nil {
-//		panic(errors.Wrapf(err, "get env(%s) int", env))
-//	}
-//	return ret
-//}

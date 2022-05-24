@@ -11,9 +11,6 @@ kube-prometheus-stack:
     enabled: false
 
 prometheus_namespace: "kubesphere-monitoring-system"
-ksAddr: "http://192.168.100.6:30880"
-ksPwd: "P@88w0rd"
-ksUsername: "admin"
 tkCluster: "default"
 
 replicaCount: 1

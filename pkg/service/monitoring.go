@@ -3,8 +3,9 @@ package service
 import (
 	"fmt"
 
-	"github.com/tkeel-io/kit/log"
 	"github.com/tkeel-io/tkeel-monitor/pkg/ksclient"
+
+	"github.com/tkeel-io/kit/log"
 )
 
 const (
@@ -20,6 +21,7 @@ type KsMetricsService struct {
 }
 
 func NewKsMetricsService(c *ksclient.KApisClient) KsMetricsService {
+
 	return KsMetricsService{c}
 }
 

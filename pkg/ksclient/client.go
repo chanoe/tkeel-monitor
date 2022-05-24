@@ -1,6 +1,7 @@
 package ksclient
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
@@ -11,6 +12,9 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8scli "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 type KApisClient struct {
@@ -22,6 +26,7 @@ type KApisClient struct {
 	RefreshToken string
 	TKNameSpace  string
 	TKCluster    string
+	KSNameSpace  string
 	username     string
 	pwd          string
 }
@@ -47,12 +52,15 @@ func WithBaseTokenPath(base, path string) Option {
 	}
 }
 
-func WithUsername(username string) Option {
+func WithKSNameSpace(nameSpace string) Option {
+	if nameSpace == "" {
+		nameSpace = "kubesphere-system"
+	}
 	return func(c *KApisClient) {
-		c.username = username
+		c.KSNameSpace = nameSpace
 	}
 }
-func WithTkeelNS(ns string) Option {
+func WithTKeelNS(ns string) Option {
 	if ns == "" {
 		ns = "keel-system"
 	}
@@ -60,17 +68,12 @@ func WithTkeelNS(ns string) Option {
 		c.TKNameSpace = ns
 	}
 }
-func WithTkeelCluster(cluster string) Option {
+func WithTKeelCluster(cluster string) Option {
 	if cluster == "" {
 		cluster = "default"
 	}
 	return func(c *KApisClient) {
 		c.TKCluster = cluster
-	}
-}
-func WithPwd(pwd string) Option {
-	return func(c *KApisClient) {
-		c.pwd = ksConsoleEncrypt("", pwd)
 	}
 }
 
@@ -140,4 +143,51 @@ func (c *KApisClient) TokenBeforeReq(client *resty.Client, request *resty.Reques
 		Value: c.Token,
 	})
 	return nil
+}
+
+func (c *KApisClient) SecretTokenBeforeReq(client *resty.Client, request *resty.Request) error {
+	if c.Token != "" {
+		request.SetCookie(&http.Cookie{
+			Name:  "token",
+			Value: c.Token,
+		})
+		return nil
+	}
+	conf, err := rest.InClusterConfig()
+	if err != nil {
+		return errors.Wrap(err, "ks client SecretTokenBeforeReq cliConf")
+	}
+	cliSet, err := k8scli.NewForConfig(conf)
+	if err != nil {
+		return errors.Wrap(err, "ks client SecretTokenBeforeReq k8sSliSet")
+	}
+	ctx := context.TODO()
+	s, err := cliSet.CoreV1().Secrets(c.KSNameSpace).Get(ctx, "kubesphere-secret", metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "ks client SecretTokenBeforeReq get secret")
+	}
+	nodes, err := cliSet.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrap(err, "ks nodes list")
+	}
+	for i := range nodes.Items {
+		if _, ok := nodes.Items[i].Labels["node-role.kubernetes.io/master"]; ok {
+			for addri := range nodes.Items[i].Status.Addresses {
+				if nodes.Items[i].Status.Addresses[addri].Type == "InternalIP" {
+					mip := nodes.Items[i].Status.Addresses[addri].Address
+					c.BaseURL = "http://" + mip + ":30880"
+					break
+				}
+			}
+			break
+		}
+	}
+	tokenBytes := s.Data["token"]
+	c.Token = string(tokenBytes)
+	request.SetCookie(&http.Cookie{
+		Name:  "token",
+		Value: c.Token,
+	})
+	return nil
+
 }
