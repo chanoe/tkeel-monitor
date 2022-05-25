@@ -1,4 +1,16 @@
+FROM golang:1.17 AS builder
+
+COPY . /src
+WORKDIR /src
+
+RUN GOPROXY=https://goproxy.cn make build
+
 FROM alpine:3.13
+
+
 ENV PLUGIN_ID=tkeel-monitor
-ADD monitor /
-CMD ["/monitor"]
+COPY --from=builder /src/bin /app
+
+WORKDIR /app
+
+CMD ["./monitor"]
