@@ -19,5 +19,5 @@ imagePullSecrets: ""
 
 image:
   repository: tkeelio/tkeel-monitor
-  tag: latest
+  # tag: latest
   pullPolicy: Always
