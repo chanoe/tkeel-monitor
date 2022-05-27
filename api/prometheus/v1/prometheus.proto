@@ -27,7 +27,113 @@ service Prometheus {
         value : {description : "OK"}
       }
     };
-  }
+  };
+
+//  rpc RulesCreate(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      post : "/prometheus/rules"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "create prometheus rules"
+//      operation_id : "RulesCreate"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  };
+//
+//  rpc RulesGet(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      get : "/prometheus/rules"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "get prometheus rules"
+//      operation_id : "RulesGet"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  }
+//
+//  rpc RulesPatch(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      patch : "/prometheus/rules"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "get prometheus rules"
+//      operation_id : "RulesPatch"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  }
+//
+//  rpc RulesUpdate(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      put : "/prometheus/rules"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "get prometheus rules"
+//      operation_id : "RulesUpdate"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  }
+//
+//  rpc RulesDelete(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      delete : "/prometheus/rules"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "get prometheus rules"
+//      operation_id : "RulesDelete"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  }
+//
+//
+//  rpc AlertManagerCreate(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      post : "/prometheus/alertmanagers"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "create prometheus alertmanagers"
+//      operation_id : "AlertManagerCreate"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  }
+//  rpc AlertManagerGet(RulesCreateRequest) returns (RulesCreateResponse) {
+//    option (google.api.http) = {
+//      post : "/prometheus/alertmanagers"
+//    };
+//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+//      summary : "get prometheus alertmanagers"
+//      operation_id : "AlertManagerGet"
+//      tags : "Prometheus"
+//      responses : {
+//        key : "200"
+//        value : {description : "OK"}
+//      }
+//    };
+//  }
+
 }
 
 // The request message containing the user's name.
