@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"strings"
+	"sync"
 	"time"
 
 	monv1 "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
@@ -83,6 +85,9 @@ func (s *PrometheusService) Query(ctx context.Context, req *pb.QueryRequest) (*p
 	)
 	st := time.UnixMilli(req.GetSt())
 	et := time.UnixMilli(req.GetEt())
+	if req.GetEt() == 0 {
+		et = time.Now()
+	}
 	if req.GetStep() == "" {
 		value, warn, err = s.pAPI.Query(ctx, req.GetQuery(), et)
 		if warn != nil {
@@ -97,6 +102,7 @@ func (s *PrometheusService) Query(ctx context.Context, req *pb.QueryRequest) (*p
 			log.Error(err)
 			return nil, err
 		}
+		metricsData.Query = req.GetQuery()
 	} else {
 		step, err1 := time.ParseDuration(req.GetStep())
 		if err1 != nil {
@@ -120,16 +126,77 @@ func (s *PrometheusService) Query(ctx context.Context, req *pb.QueryRequest) (*p
 			log.Error(err)
 			return nil, err
 		}
+		metricsData.Query = req.GetQuery()
 	}
 	return &pb.QueryResponse{
 		Result: metricsData,
 	}, nil
 }
 
-func (s *PrometheusService) Rules(ctx context.Context, req *pb.QueryRequest) (*pb.QueryResponse, error) {
-	s.monV1Cli.PrometheusRules(s.TKeelNS)
-	s.monV1Cli.Alertmanagers(s.TKeelNS)
-	s.monV1Alp1Cli.AlertmanagerConfigs(s.TKeelNS)
+func (s *PrometheusService) BatchQuery(ctx context.Context, req *pb.BatchQueryRequest) (*pb.BatchQueryResponse, error) {
+	if req.GetQuery() == "" {
+		return nil, pb.MonitoringErrInvalidArgument()
+	}
+	qrys := strings.Split(req.GetQuery(), "|")
+	result := make([]*pb.MetricsData, len(qrys))
 
-	return nil, nil
+	st := time.UnixMilli(req.GetSt())
+	et := time.UnixMilli(req.GetEt())
+	if req.GetEt() == 0 {
+		et = time.Now()
+	}
+
+	wg := sync.WaitGroup{}
+	if req.GetStep() == "" {
+		for i := range qrys {
+			wg.Add(1)
+			value, warn, err := s.pAPI.Query(ctx, qrys[i], et)
+			if warn != nil {
+				log.Warnf("query %s warn: %v", req, warn)
+			}
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData := mprom.Parse2pbQueryResp(value, nil)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData.Query = qrys[i]
+			result[i] = metricsData
+			wg.Done()
+		}
+	} else {
+		step, err1 := time.ParseDuration(req.GetStep())
+		if err1 != nil {
+			log.Errorf("time step parse err: %s", err1)
+			return nil, pb.ResourceErrUnknown()
+		}
+		for i := range qrys {
+			wg.Add(1)
+			value, warn, err := s.pAPI.QueryRange(ctx, qrys[i], promv1cli.Range{
+				Start: st,
+				End:   et,
+				Step:  step,
+			})
+			if warn != nil {
+				log.Warnf("query range %s warn: %v", req, warn)
+			}
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData := mprom.Parse2pbQueryRangeResp(value, nil)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData.Query = qrys[i]
+			result[i] = metricsData
+			wg.Done()
+		}
+	}
+	wg.Wait()
+	return &pb.BatchQueryResponse{Results: result}, nil
 }

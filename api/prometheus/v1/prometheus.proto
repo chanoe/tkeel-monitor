@@ -16,7 +16,7 @@ service Prometheus {
   // Sends query.
   rpc Query(QueryRequest) returns (QueryResponse) {
     option (google.api.http) = {
-      get : "/prometheus"
+      get : "/prometheus/query"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary : "query promehteus"
@@ -28,111 +28,21 @@ service Prometheus {
       }
     };
   };
-
-//  rpc RulesCreate(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      post : "/prometheus/rules"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "create prometheus rules"
-//      operation_id : "RulesCreate"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  };
-//
-//  rpc RulesGet(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      get : "/prometheus/rules"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "get prometheus rules"
-//      operation_id : "RulesGet"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  }
-//
-//  rpc RulesPatch(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      patch : "/prometheus/rules"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "get prometheus rules"
-//      operation_id : "RulesPatch"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  }
-//
-//  rpc RulesUpdate(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      put : "/prometheus/rules"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "get prometheus rules"
-//      operation_id : "RulesUpdate"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  }
-//
-//  rpc RulesDelete(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      delete : "/prometheus/rules"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "get prometheus rules"
-//      operation_id : "RulesDelete"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  }
-//
-//
-//  rpc AlertManagerCreate(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      post : "/prometheus/alertmanagers"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "create prometheus alertmanagers"
-//      operation_id : "AlertManagerCreate"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  }
-//  rpc AlertManagerGet(RulesCreateRequest) returns (RulesCreateResponse) {
-//    option (google.api.http) = {
-//      post : "/prometheus/alertmanagers"
-//    };
-//    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-//      summary : "get prometheus alertmanagers"
-//      operation_id : "AlertManagerGet"
-//      tags : "Prometheus"
-//      responses : {
-//        key : "200"
-//        value : {description : "OK"}
-//      }
-//    };
-//  }
+  // Sends query.
+  rpc BatchQuery(BatchQueryRequest) returns (BatchQueryResponse) {
+    option (google.api.http) = {
+      get : "/prometheus/batch_query"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary : "batch query promehteus"
+      operation_id : "Query"
+      tags : "Prometheus"
+      responses : {
+        key : "200"
+        value : {description : "OK"}
+      }
+    };
+  };
 
 }
 
@@ -167,15 +77,52 @@ message QueryRequest {
 // The response message containing the greetings
 message QueryResponse {
   MetricsData result = 1
-      [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-        description : "Hello Response"
-      } ];
+  [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description : "Hello Response"
+  } ];
+}
+
+// The request message containing the user's name.
+message BatchQueryRequest {
+  string query = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "query filed,multi query splited with '|' "
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  int64 st = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "start_time"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  int64 et = 3 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "end_time"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  string step = 4 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "time step"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+}
+
+// The response message containing the greetings
+message BatchQueryResponse {
+  repeated MetricsData results = 1
+  [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description : "Hello Response"
+  } ];
 }
 
 
 message MetricsData {
   string result_type =1 ;
-  repeated MetricValue result =2;
+  string query =2 ;
+  repeated MetricValue result =3;
 }
 
 message MetricValue {

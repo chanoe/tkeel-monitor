@@ -23,10 +23,8 @@ vendor/
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
 *.a
-*.so
 ./monitor*
 monitor
-zlocal/build.sh
 
 # OS General
 Thumbs.db
@@ -42,6 +40,5 @@ bin/
 .vscode/
 .idea/
 *.swp
-zlocal/build.sh
 zlocal
 /monitor

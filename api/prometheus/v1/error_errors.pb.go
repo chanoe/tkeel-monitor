@@ -15,6 +15,7 @@ var resourceErrUnknown *errors.TError
 var resourceErrNotFound *errors.TError
 var resourceErrListMysql *errors.TError
 var resourceErrInfoMysql *errors.TError
+var monitoringErrInvalidArgument *errors.TError
 
 func init() {
 	resourceErrUnknown = errors.New(int(codes.Unknown), "helloworld.v1.RESOURCE_ERR_UNKNOWN", Error_RESOURCE_ERR_UNKNOWN.String())
@@ -25,6 +26,8 @@ func init() {
 	errors.Register(resourceErrListMysql)
 	resourceErrInfoMysql = errors.New(int(codes.Internal), "helloworld.v1.RESOURCE_ERR_INFO_MYSQL", Error_RESOURCE_ERR_INFO_MYSQL.String())
 	errors.Register(resourceErrInfoMysql)
+	monitoringErrInvalidArgument = errors.New(int(codes.InvalidArgument), "helloworld.v1.MONITORING_ERR_INVALID_ARGUMENT", Error_MONITORING_ERR_INVALID_ARGUMENT.String())
+	errors.Register(monitoringErrInvalidArgument)
 }
 
 func ResourceErrUnknown() errors.Error {
@@ -41,4 +44,8 @@ func ResourceErrListMysql() errors.Error {
 
 func ResourceErrInfoMysql() errors.Error {
 	return resourceErrInfoMysql
+}
+
+func MonitoringErrInvalidArgument() errors.Error {
+	return monitoringErrInvalidArgument
 }

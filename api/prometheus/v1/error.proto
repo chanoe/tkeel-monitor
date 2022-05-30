@@ -22,4 +22,7 @@ enum Error {
   // 获取详情数据出错
   // @code=INTERNAL
   RESOURCE_ERR_INFO_MYSQL = 3;
+  // 参数错误
+  // @code=INVALID_ARGUMENT
+  MONITORING_ERR_INVALID_ARGUMENT = 4;
 }
