@@ -33,6 +33,10 @@ func RegisterKSMetricsHTTPServer(container *go_restful.Container, srv *KSMetrics
 		To(srv.PluginPods))
 	ws.Route(ws.GET("/monitoring/pods/metrics").
 		To(srv.PodsCpuMem))
+	ws.Route(ws.GET("/monitoring/pods/metrics").
+		To(srv.PodsCpuMem))
+	ws.Route(ws.GET("/monitoring/plugins/statusaddr").
+		To(srv.PluginStatusAddr))
 }
 
 type KSMetricsServer struct {
@@ -173,6 +177,25 @@ func (s *KSMetricsServer) PodsCpuMem(req *go_restful.Request, resp *go_restful.R
 			result.Set(tErr.Reason, tErr.Message, res), "application/json")
 		return
 	}
+	resp.WriteHeaderAndJson(http.StatusOK,
+		result.Set(errors.Success.Reason, "", resData), "application/json")
+	return
+}
+
+func (s *KSMetricsServer) PluginStatusAddr(req *go_restful.Request, resp *go_restful.Response) {
+	res, err := s.ksSvc.PluginStatusAddr(req.QueryParameter("plugin"))
+	if err != nil {
+		tErr := errors.FromError(err)
+		httpCode := errors.GRPCToHTTPStatusCode(tErr.GRPCStatus().Code())
+		if httpCode == http.StatusMovedPermanently {
+			resp.Header().Set("Location", tErr.Message)
+		}
+		resp.WriteHeaderAndJson(httpCode,
+			result.Set(tErr.Reason, tErr.Message, res), "application/json")
+		return
+	}
+	resData := make(map[string]interface{})
+	resData["address"] = res
 	resp.WriteHeaderAndJson(http.StatusOK,
 		result.Set(errors.Success.Reason, "", resData), "application/json")
 	return

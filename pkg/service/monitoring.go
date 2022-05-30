@@ -14,6 +14,7 @@ const (
 	KSPATH_V1ALPHA3_PODS         = "/kapis/resources.kubesphere.io/v1alpha3/namespaces/%s/pods"
 	KSPATH_V1ALPHA3_PODS_MONITOR = "/kapis/monitoring.kubesphere.io/v1alpha3/namespaces/%s/pods"
 	KSPATH_LOGIN                 = "/login"
+	KSPATH_RESOURCE_STATUS       = "%s/clusters/%s/projects/%s/%s/%s/resource-status"
 )
 
 type KsMetricsService struct {
@@ -21,7 +22,6 @@ type KsMetricsService struct {
 }
 
 func NewKsMetricsService(c *ksclient.KApisClient) KsMetricsService {
-
 	return KsMetricsService{c}
 }
 
@@ -57,6 +57,11 @@ func (svc KsMetricsService) PodsCpuMem(plugin, resources, start, end, step, time
 	}
 
 	return res.Body(), nil
+}
+
+func (svc KsMetricsService) PluginStatusAddr(plugin string) (string, error) {
+	addr := fmt.Sprintf(KSPATH_RESOURCE_STATUS, svc.kapiCli.BaseURL, svc.kapiCli.TKCluster, svc.kapiCli.TKNameSpace, "deployments", plugin)
+	return addr, nil
 }
 
 func parseDeploymentQuery(name, status, sortBy, ascending, limit, page string) map[string]string {
@@ -96,9 +101,10 @@ func parsePodsQuery(plugin string) map[string]string {
 		labelSelector = "app.kubernetes.io/component=controller,app.kubernetes.io/instance=tkeel-middleware,app.kubernetes.io/name=nginx-ingress-controller"
 	case "tkeel-core-influxdb":
 		labelSelector = "app.kubernetes.io/component=influxdb,app.kubernetes.io/instance=tkeel-core,app.kubernetes.io/name=influxdb"
+	case "iot-alarm":
+		labelSelector = "app.kubernetes.io/instance=iot-alarm,app.kubernetes.io/name=iot-alarm"
 	default:
 		labelSelector = fmt.Sprintf("app=%s", plugin)
-
 	}
 
 	q["labelSelector"] = labelSelector

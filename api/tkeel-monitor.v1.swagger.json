@@ -75,7 +75,62 @@
         ]
       }
     },
-    "/prometheus": {
+    "/prometheus/batch_query": {
+      "get": {
+        "summary": "batch query promehteus",
+        "operationId": "Query",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/v1BatchQueryResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "description": "query filed,multi query splited with '|' ",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "st",
+            "description": "start_time",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "et",
+            "description": "end_time",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "step",
+            "description": "time step",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Prometheus"
+        ]
+      }
+    },
+    "/prometheus/query": {
       "get": {
         "summary": "query promehteus",
         "operationId": "Query",
@@ -296,6 +351,19 @@
       },
       "description": "*\nmessage plugin declares extension point."
     },
+    "v1BatchQueryResponse": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v1MetricsData"
+          },
+          "description": "Hello Response"
+        }
+      },
+      "title": "The response message containing the greetings"
+    },
     "v1BriefPluginInfo": {
       "type": "object",
       "properties": {
@@ -449,6 +517,9 @@
       "type": "object",
       "properties": {
         "result_type": {
+          "type": "string"
+        },
+        "query": {
           "type": "string"
         },
         "result": {

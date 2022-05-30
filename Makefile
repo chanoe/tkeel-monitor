@@ -3,6 +3,9 @@ VERSION=$(shell git describe --tags --always)
 INTERNAL_PROTO_FILES=$(shell find internal -name *.proto)
 API_PROTO_FILES=$(shell find api -name *.proto)
 
+# docker tag
+DOCKER_TAG ?= latest
+
 .PHONY: init
 # init env
 init:
@@ -36,7 +39,7 @@ api:
 .PHONY: build
 # build
 build:
-	mkdir -p bin/ && CGO_ENABLED=0 go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+	mkdir -p bin/ && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-X github.com/tkeel-io/tkeel/pkg/version.GitCommit=${GIT_COMMIT} -X github.com/tkeel-io/tkeel/pkg/version.GitVersion=${GIT_VERSION} -X github.com/tkeel-io/tkeel/pkg/version.BuildDate=${BUILD_DATE} -X github.com/tkeel-io/tkeel/pkg/version.Version=${TKEEL_VERSION} -s -w" -o ./bin/ ./cmd/monitor/
 
 .PHONY: generate
 # generate
@@ -68,3 +71,15 @@ help:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help
+
+################################################################################
+# Target: build docker image                                                   #
+################################################################################
+.PHONY: build-dev-container
+build-dev-container:
+	docker build -t tkeelio/tkeel-monitor:$(DOCKER_TAG) .
+	docker push  tkeelio/tkeel-monitor:$(DOCKER_TAG)
+ifeq ($(DOCKER_TAG),latest)
+	docker tag tkeelio/tkeel-monitor:$(DOCKER_TAG) tkeelio/tkeel-monitor:dev
+	docker push  tkeelio/tkeel-monitor:dev
+endif

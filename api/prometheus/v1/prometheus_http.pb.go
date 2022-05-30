@@ -28,6 +28,7 @@ var (
 )
 
 type PrometheusHTTPServer interface {
+	BatchQuery(context.Context, *BatchQueryRequest) (*BatchQueryResponse, error)
 	Query(context.Context, *QueryRequest) (*QueryResponse, error)
 }
 
@@ -37,6 +38,62 @@ type PrometheusHTTPHandler struct {
 
 func newPrometheusHTTPHandler(s PrometheusHTTPServer) *PrometheusHTTPHandler {
 	return &PrometheusHTTPHandler{srv: s}
+}
+
+func (h *PrometheusHTTPHandler) BatchQuery(req *go_restful.Request, resp *go_restful.Response) {
+	in := BatchQueryRequest{}
+	if err := transportHTTP.GetQuery(req, &in); err != nil {
+		resp.WriteHeaderAndJson(http.StatusBadRequest,
+			result.Set(errors.InternalError.Reason, err.Error(), nil), "application/json")
+		return
+	}
+
+	ctx := transportHTTP.ContextWithHeader(req.Request.Context(), req.Request.Header)
+
+	out, err := h.srv.BatchQuery(ctx, &in)
+	if err != nil {
+		tErr := errors.FromError(err)
+		httpCode := errors.GRPCToHTTPStatusCode(tErr.GRPCStatus().Code())
+		if httpCode == http.StatusMovedPermanently {
+			resp.Header().Set("Location", tErr.Message)
+		}
+		resp.WriteHeaderAndJson(httpCode,
+			result.Set(tErr.Reason, tErr.Message, out), "application/json")
+		return
+	}
+	anyOut, err := anypb.New(out)
+	if err != nil {
+		resp.WriteHeaderAndJson(http.StatusInternalServerError,
+			result.Set(errors.InternalError.Reason, err.Error(), nil), "application/json")
+		return
+	}
+
+	outB, err := protojson.MarshalOptions{
+		UseProtoNames:   true,
+		EmitUnpopulated: true,
+	}.Marshal(&result.Http{
+		Code: errors.Success.Reason,
+		Msg:  "",
+		Data: anyOut,
+	})
+	if err != nil {
+		resp.WriteHeaderAndJson(http.StatusInternalServerError,
+			result.Set(errors.InternalError.Reason, err.Error(), nil), "application/json")
+		return
+	}
+	resp.AddHeader(go_restful.HEADER_ContentType, "application/json")
+
+	var remain int
+	for {
+		outB = outB[remain:]
+		remain, err = resp.Write(outB)
+		if err != nil {
+			return
+		}
+		if remain == 0 {
+			break
+		}
+	}
 }
 
 func (h *PrometheusHTTPHandler) Query(req *go_restful.Request, resp *go_restful.Response) {
@@ -111,6 +168,8 @@ func RegisterPrometheusHTTPServer(container *go_restful.Container, srv Prometheu
 	}
 
 	handler := newPrometheusHTTPHandler(srv)
-	ws.Route(ws.GET("/prometheus").
+	ws.Route(ws.GET("/prometheus/query").
 		To(handler.Query))
+	ws.Route(ws.GET("/prometheus/batch_query").
+		To(handler.BatchQuery))
 }

@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 type PrometheusClient interface {
 	// Sends query.
 	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
+	// Sends query.
+	BatchQuery(ctx context.Context, in *BatchQueryRequest, opts ...grpc.CallOption) (*BatchQueryResponse, error)
 }
 
 type prometheusClient struct {
@@ -39,12 +41,23 @@ func (c *prometheusClient) Query(ctx context.Context, in *QueryRequest, opts ...
 	return out, nil
 }
 
+func (c *prometheusClient) BatchQuery(ctx context.Context, in *BatchQueryRequest, opts ...grpc.CallOption) (*BatchQueryResponse, error) {
+	out := new(BatchQueryResponse)
+	err := c.cc.Invoke(ctx, "/prometheus.v1.Prometheus/BatchQuery", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PrometheusServer is the server API for Prometheus service.
 // All implementations must embed UnimplementedPrometheusServer
 // for forward compatibility
 type PrometheusServer interface {
 	// Sends query.
 	Query(context.Context, *QueryRequest) (*QueryResponse, error)
+	// Sends query.
+	BatchQuery(context.Context, *BatchQueryRequest) (*BatchQueryResponse, error)
 	mustEmbedUnimplementedPrometheusServer()
 }
 
@@ -54,6 +67,9 @@ type UnimplementedPrometheusServer struct {
 
 func (UnimplementedPrometheusServer) Query(context.Context, *QueryRequest) (*QueryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Query not implemented")
+}
+func (UnimplementedPrometheusServer) BatchQuery(context.Context, *BatchQueryRequest) (*BatchQueryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchQuery not implemented")
 }
 func (UnimplementedPrometheusServer) mustEmbedUnimplementedPrometheusServer() {}
 
@@ -86,6 +102,24 @@ func _Prometheus_Query_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Prometheus_BatchQuery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchQueryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrometheusServer).BatchQuery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/prometheus.v1.Prometheus/BatchQuery",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrometheusServer).BatchQuery(ctx, req.(*BatchQueryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Prometheus_ServiceDesc is the grpc.ServiceDesc for Prometheus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -96,6 +130,10 @@ var Prometheus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Query",
 			Handler:    _Prometheus_Query_Handler,
+		},
+		{
+			MethodName: "BatchQuery",
+			Handler:    _Prometheus_BatchQuery_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

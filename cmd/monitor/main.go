@@ -3,21 +3,20 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/tkeel-io/tkeel-monitor/api/monitoring/v1"
-	"github.com/tkeel-io/tkeel-monitor/pkg/ksclient"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/tkeel-io/kit/app"
-	"github.com/tkeel-io/kit/log"
-	"github.com/tkeel-io/kit/transport"
+	"github.com/tkeel-io/tkeel-monitor/api/monitoring/v1"
+	openapi "github.com/tkeel-io/tkeel-monitor/api/openapi/v1"
+	prometheusv1 "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
+	"github.com/tkeel-io/tkeel-monitor/pkg/ksclient"
 	"github.com/tkeel-io/tkeel-monitor/pkg/server"
 	"github.com/tkeel-io/tkeel-monitor/pkg/service"
 
-	// User import.
-	openapi "github.com/tkeel-io/tkeel-monitor/api/openapi/v1"
-	prometheusv1 "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
+	"github.com/tkeel-io/kit/app"
+	"github.com/tkeel-io/kit/log"
+	"github.com/tkeel-io/kit/transport"
 )
 
 var (
@@ -70,7 +69,7 @@ func main() {
 
 	{
 		// prom service
-		promSvc := service.NewPrometheusService(PromNamespace)
+		promSvc := service.NewPrometheusService(PromNamespace, TKeelNamespace)
 		prometheusv1.RegisterPrometheusHTTPServer(httpSrv.Container, promSvc)
 
 		// ks metrics
