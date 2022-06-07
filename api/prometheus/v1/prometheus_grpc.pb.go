@@ -22,6 +22,10 @@ type PrometheusClient interface {
 	Query(ctx context.Context, in *QueryRequest, opts ...grpc.CallOption) (*QueryResponse, error)
 	// Sends query.
 	BatchQuery(ctx context.Context, in *BatchQueryRequest, opts ...grpc.CallOption) (*BatchQueryResponse, error)
+	// Sends query.
+	TKMeter(ctx context.Context, in *TKMeterRequest, opts ...grpc.CallOption) (*QueryResponse, error)
+	// Sends query.
+	BatchTKMeter(ctx context.Context, in *TKMeterBatchRequest, opts ...grpc.CallOption) (*BatchQueryResponse, error)
 }
 
 type prometheusClient struct {
@@ -50,6 +54,24 @@ func (c *prometheusClient) BatchQuery(ctx context.Context, in *BatchQueryRequest
 	return out, nil
 }
 
+func (c *prometheusClient) TKMeter(ctx context.Context, in *TKMeterRequest, opts ...grpc.CallOption) (*QueryResponse, error) {
+	out := new(QueryResponse)
+	err := c.cc.Invoke(ctx, "/prometheus.v1.Prometheus/TKMeter", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *prometheusClient) BatchTKMeter(ctx context.Context, in *TKMeterBatchRequest, opts ...grpc.CallOption) (*BatchQueryResponse, error) {
+	out := new(BatchQueryResponse)
+	err := c.cc.Invoke(ctx, "/prometheus.v1.Prometheus/BatchTKMeter", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PrometheusServer is the server API for Prometheus service.
 // All implementations must embed UnimplementedPrometheusServer
 // for forward compatibility
@@ -58,6 +80,10 @@ type PrometheusServer interface {
 	Query(context.Context, *QueryRequest) (*QueryResponse, error)
 	// Sends query.
 	BatchQuery(context.Context, *BatchQueryRequest) (*BatchQueryResponse, error)
+	// Sends query.
+	TKMeter(context.Context, *TKMeterRequest) (*QueryResponse, error)
+	// Sends query.
+	BatchTKMeter(context.Context, *TKMeterBatchRequest) (*BatchQueryResponse, error)
 	mustEmbedUnimplementedPrometheusServer()
 }
 
@@ -70,6 +96,12 @@ func (UnimplementedPrometheusServer) Query(context.Context, *QueryRequest) (*Que
 }
 func (UnimplementedPrometheusServer) BatchQuery(context.Context, *BatchQueryRequest) (*BatchQueryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BatchQuery not implemented")
+}
+func (UnimplementedPrometheusServer) TKMeter(context.Context, *TKMeterRequest) (*QueryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TKMeter not implemented")
+}
+func (UnimplementedPrometheusServer) BatchTKMeter(context.Context, *TKMeterBatchRequest) (*BatchQueryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchTKMeter not implemented")
 }
 func (UnimplementedPrometheusServer) mustEmbedUnimplementedPrometheusServer() {}
 
@@ -120,6 +152,42 @@ func _Prometheus_BatchQuery_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Prometheus_TKMeter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TKMeterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrometheusServer).TKMeter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/prometheus.v1.Prometheus/TKMeter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrometheusServer).TKMeter(ctx, req.(*TKMeterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Prometheus_BatchTKMeter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TKMeterBatchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PrometheusServer).BatchTKMeter(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/prometheus.v1.Prometheus/BatchTKMeter",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PrometheusServer).BatchTKMeter(ctx, req.(*TKMeterBatchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Prometheus_ServiceDesc is the grpc.ServiceDesc for Prometheus service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +202,14 @@ var Prometheus_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BatchQuery",
 			Handler:    _Prometheus_BatchQuery_Handler,
+		},
+		{
+			MethodName: "TKMeter",
+			Handler:    _Prometheus_TKMeter_Handler,
+		},
+		{
+			MethodName: "BatchTKMeter",
+			Handler:    _Prometheus_BatchTKMeter_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

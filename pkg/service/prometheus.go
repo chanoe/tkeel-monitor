@@ -2,9 +2,13 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
+
+	pb "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
+	mprom "github.com/tkeel-io/tkeel-monitor/pkg/model/prometheus"
 
 	monv1 "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
 	monv1alp1 "github.com/prometheus-operator/prometheus-operator/pkg/client/versioned/typed/monitoring/v1alpha1"
@@ -12,8 +16,6 @@ import (
 	promv1cli "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 	"github.com/tkeel-io/kit/log"
-	pb "github.com/tkeel-io/tkeel-monitor/api/prometheus/v1"
-	mprom "github.com/tkeel-io/tkeel-monitor/pkg/model/prometheus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
@@ -199,4 +201,150 @@ func (s *PrometheusService) BatchQuery(ctx context.Context, req *pb.BatchQueryRe
 	}
 	wg.Wait()
 	return &pb.BatchQueryResponse{Results: result}, nil
+}
+
+func (s *PrometheusService) TKMeter(ctx context.Context, req *pb.TKMeterRequest) (*pb.QueryResponse, error) {
+	var (
+		value       model.Value
+		warn        promv1cli.Warnings
+		err         error
+		metricsData *pb.MetricsData
+	)
+	st := time.UnixMilli(req.GetSt())
+	et := time.UnixMilli(req.GetEt())
+	if req.GetEt() == 0 {
+		et = time.Now()
+	}
+	expr, err := mprom.ExpressFromMetricsMap(req.Meter, tenantLabel(req.GetTenantId()))
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	if req.GetStep() == "" {
+		value, warn, err = s.pAPI.Query(ctx, expr, et)
+		if warn != nil {
+			log.Warnf("query %s warn: %v", req, warn)
+		}
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		metricsData = mprom.Parse2pbQueryResp(value, nil)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		metricsData.Query = req.Meter
+	} else {
+		step, err1 := time.ParseDuration(req.GetStep())
+		if err1 != nil {
+			log.Errorf("time step parse err: %s", err1)
+			return nil, pb.ResourceErrUnknown()
+		}
+		value, warn, err = s.pAPI.QueryRange(ctx, expr, promv1cli.Range{
+			Start: st,
+			End:   et,
+			Step:  step,
+		})
+		if warn != nil {
+			log.Warnf("query range %s warn: %v", req, warn)
+		}
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		metricsData = mprom.Parse2pbQueryRangeResp(value, nil)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		metricsData.Query = req.GetMeter()
+	}
+	return &pb.QueryResponse{
+		Result: metricsData,
+	}, nil
+}
+func (s *PrometheusService) BatchTKMeter(ctx context.Context, req *pb.TKMeterBatchRequest) (*pb.BatchQueryResponse, error) {
+	if req.GetMeters() == "" {
+		return nil, pb.MonitoringErrInvalidArgument()
+	}
+	qrys := strings.Split(req.GetMeters(), "|")
+	result := make([]*pb.MetricsData, len(qrys))
+
+	st := time.UnixMilli(req.GetSt())
+	et := time.UnixMilli(req.GetEt())
+	if req.GetEt() == 0 {
+		et = time.Now()
+	}
+
+	wg := sync.WaitGroup{}
+	if req.GetStep() == "" {
+		for i := range qrys {
+			wg.Add(1)
+			expr, err := mprom.ExpressFromMetricsMap(qrys[i], tenantLabel(req.GetTenantId()))
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			value, warn, err := s.pAPI.Query(ctx, expr, et)
+			if warn != nil {
+				log.Warnf("query %s warn: %v", req, warn)
+			}
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData := mprom.Parse2pbQueryResp(value, nil)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData.Query = qrys[i]
+			result[i] = metricsData
+			wg.Done()
+		}
+	} else {
+		step, err1 := time.ParseDuration(req.GetStep())
+		if err1 != nil {
+			log.Errorf("time step parse err: %s", err1)
+			return nil, pb.ResourceErrUnknown()
+		}
+		for i := range qrys {
+			wg.Add(1)
+			expr, err := mprom.ExpressFromMetricsMap(qrys[i], tenantLabel(req.GetTenantId()))
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			value, warn, err := s.pAPI.QueryRange(ctx, expr, promv1cli.Range{
+				Start: st,
+				End:   et,
+				Step:  step,
+			})
+			if warn != nil {
+				log.Warnf("query range %s warn: %v", req, warn)
+			}
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData := mprom.Parse2pbQueryRangeResp(value, nil)
+			if err != nil {
+				log.Error(err)
+				return nil, err
+			}
+			metricsData.Query = qrys[i]
+			result[i] = metricsData
+			wg.Done()
+		}
+	}
+	wg.Wait()
+	return &pb.BatchQueryResponse{Results: result}, nil
+}
+
+func tenantLabel(tenant_id string) string {
+	if tenant_id != "" {
+		tenant_id = fmt.Sprintf("tenant_id='%s'", tenant_id)
+	}
+	return tenant_id
 }

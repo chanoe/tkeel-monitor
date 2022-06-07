@@ -43,6 +43,36 @@ service Prometheus {
       }
     };
   };
+  // Sends query.
+  rpc TKMeter(TKMeterRequest) returns (QueryResponse) {
+    option (google.api.http) = {
+      get : "/prometheus/tkmeter"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary : "query promehteus by tkeel meter"
+      operation_id : "TKMeter"
+      tags : "Prometheus"
+      responses : {
+        key : "200"
+        value : {description : "OK"}
+      }
+    };
+  };
+  // Sends query.
+  rpc BatchTKMeter(TKMeterBatchRequest) returns (BatchQueryResponse) {
+    option (google.api.http) = {
+      get : "/prometheus/batch_tkmeter"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary : "query promehteus by tkeel meter"
+      operation_id : "TKMeterBatch"
+      tags : "Prometheus"
+      responses : {
+        key : "200"
+        value : {description : "OK"}
+      }
+    };
+  };
 
 }
 
@@ -69,6 +99,12 @@ message QueryRequest {
   string step = 4 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
       description : "time step"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  string tenant_id = 5 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "tenant_id"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
@@ -108,6 +144,12 @@ message BatchQueryRequest {
     },
     (google.api.field_behavior) = OPTIONAL
   ];
+  string tenant_id = 5 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "tenant_id"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
 }
 
 // The response message containing the greetings
@@ -119,6 +161,72 @@ message BatchQueryResponse {
 }
 
 
+message TKMeterRequest{
+  string meter = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "meter name"
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  int64 st = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "start_time"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  int64 et = 3 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "end_time"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  string step = 4 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "time step"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  string tenant_id = 5 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "tenant_id"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+}
+
+// The request message containing the user's name.
+message TKMeterBatchRequest {
+  string meters = 1 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "query tkeel meters ,multi meters splited with '|' "
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  int64 st = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "start_time"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  int64 et = 3 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "end_time"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  string step = 4 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "time step"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+  string tenant_id = 5 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description : "tenant_id"
+    },
+    (google.api.field_behavior) = OPTIONAL
+  ];
+}
 message MetricsData {
   string result_type =1 ;
   string query =2 ;
