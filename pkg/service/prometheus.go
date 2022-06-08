@@ -152,22 +152,24 @@ func (s *PrometheusService) BatchQuery(ctx context.Context, req *pb.BatchQueryRe
 	if req.GetStep() == "" {
 		for i := range qrys {
 			wg.Add(1)
-			value, warn, err := s.pAPI.Query(ctx, qrys[i], et)
-			if warn != nil {
-				log.Warnf("query %s warn: %v", req, warn)
-			}
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData := mprom.Parse2pbQueryResp(value, nil)
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData.Query = qrys[i]
-			result[i] = metricsData
-			wg.Done()
+			go func(id int) {
+				value, warn, err := s.pAPI.Query(ctx, qrys[id], et)
+				if warn != nil {
+					log.Warnf("query %s warn: %v", req, warn)
+				}
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData := mprom.Parse2pbQueryResp(value, nil)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData.Query = qrys[id]
+				result[id] = metricsData
+				wg.Done()
+			}(i)
 		}
 	} else {
 		step, err1 := time.ParseDuration(req.GetStep())
@@ -177,26 +179,28 @@ func (s *PrometheusService) BatchQuery(ctx context.Context, req *pb.BatchQueryRe
 		}
 		for i := range qrys {
 			wg.Add(1)
-			value, warn, err := s.pAPI.QueryRange(ctx, qrys[i], promv1cli.Range{
-				Start: st,
-				End:   et,
-				Step:  step,
-			})
-			if warn != nil {
-				log.Warnf("query range %s warn: %v", req, warn)
-			}
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData := mprom.Parse2pbQueryRangeResp(value, nil)
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData.Query = qrys[i]
-			result[i] = metricsData
-			wg.Done()
+			go func(id int) {
+				value, warn, err := s.pAPI.QueryRange(ctx, qrys[id], promv1cli.Range{
+					Start: st,
+					End:   et,
+					Step:  step,
+				})
+				if warn != nil {
+					log.Warnf("query range %s warn: %v", req, warn)
+				}
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData := mprom.Parse2pbQueryRangeResp(value, nil)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData.Query = qrys[id]
+				result[id] = metricsData
+				wg.Done()
+			}(i)
 		}
 	}
 	wg.Wait()
@@ -281,27 +285,29 @@ func (s *PrometheusService) BatchTKMeter(ctx context.Context, req *pb.TKMeterBat
 	if req.GetStep() == "" {
 		for i := range qrys {
 			wg.Add(1)
-			expr, err := mprom.ExpressFromMetricsMap(qrys[i], tenantLabel(req.GetTenantId()))
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			value, warn, err := s.pAPI.Query(ctx, expr, et)
-			if warn != nil {
-				log.Warnf("query %s warn: %v", req, warn)
-			}
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData := mprom.Parse2pbQueryResp(value, nil)
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData.Query = qrys[i]
-			result[i] = metricsData
-			wg.Done()
+			go func(id int) {
+				expr, err := mprom.ExpressFromMetricsMap(qrys[id], tenantLabel(req.GetTenantId()))
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				value, warn, err := s.pAPI.Query(ctx, expr, et)
+				if warn != nil {
+					log.Warnf("query %s warn: %v", req, warn)
+				}
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData := mprom.Parse2pbQueryResp(value, nil)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData.Query = qrys[id]
+				result[id] = metricsData
+				wg.Done()
+			}(i)
 		}
 	} else {
 		step, err1 := time.ParseDuration(req.GetStep())
@@ -311,31 +317,33 @@ func (s *PrometheusService) BatchTKMeter(ctx context.Context, req *pb.TKMeterBat
 		}
 		for i := range qrys {
 			wg.Add(1)
-			expr, err := mprom.ExpressFromMetricsMap(qrys[i], tenantLabel(req.GetTenantId()))
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			value, warn, err := s.pAPI.QueryRange(ctx, expr, promv1cli.Range{
-				Start: st,
-				End:   et,
-				Step:  step,
-			})
-			if warn != nil {
-				log.Warnf("query range %s warn: %v", req, warn)
-			}
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData := mprom.Parse2pbQueryRangeResp(value, nil)
-			if err != nil {
-				log.Error(err)
-				return nil, err
-			}
-			metricsData.Query = qrys[i]
-			result[i] = metricsData
-			wg.Done()
+			go func(id int) {
+				expr, err := mprom.ExpressFromMetricsMap(qrys[id], tenantLabel(req.GetTenantId()))
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				value, warn, err := s.pAPI.QueryRange(ctx, expr, promv1cli.Range{
+					Start: st,
+					End:   et,
+					Step:  step,
+				})
+				if warn != nil {
+					log.Warnf("query range %s warn: %v", req, warn)
+				}
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData := mprom.Parse2pbQueryRangeResp(value, nil)
+				if err != nil {
+					log.Error(err)
+					return
+				}
+				metricsData.Query = qrys[id]
+				result[id] = metricsData
+				wg.Done()
+			}(i)
 		}
 	}
 	wg.Wait()
