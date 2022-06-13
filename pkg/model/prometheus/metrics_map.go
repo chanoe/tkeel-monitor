@@ -23,7 +23,7 @@ var MetricsMap = map[string]string{
 	"rule_execute_num_24h":               "sum(increase(rule_execute_num{$}[24h])) / (count (sum by (pod) (rule_num)))",                                                         // 24小时 规则执行数
 	"rate_rule_failure_24h":              "ceil((sum(rule_execute_num{status='failure',$}) / sum(rule_execute_num{$}))*100)",                                                    // 规则执行失败率
 	"num_rule_execute_failure":           "sum(rule_execute_num{status='failure',$})",                                                                                           // 规则执行失败数
-	"num_rule_execute_success":           "sum(rule_execute_num{status='success',$})",                                                                                           // 规则执行成功书
+	"num_rule_execute_success":           "sum(rule_execute_num{status='success',$})",                                                                                           // 规则执行成功数
 	"rate_rule_execute_failure_5m":       "rate(rule_execute_num{status='failure',$}[5m])",                                                                                      // 失败的规则执行速率
 	"rate_rule_execute_success_5m":       "rate(rule_execute_num{status='success',$}[5m])",                                                                                      // 成功的规则执行速率
 	"sum_device_num":                     "sum(device_num_total{$}) / (count (sum by (pod) (device_num_total)))",                                                                // 设备数量
