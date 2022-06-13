@@ -10,6 +10,7 @@ var MetricsMap = map[string]string{
 	"sum_tkapi_request_7d":               "ceil(sum(increase(tkapi_request_total{$}[7d])))",
 	"sum_tkapi_request_24h":              "ceil(sum(increase(tkapi_request_total{$}[24h])))",
 	"avg_tkapi_request_latency_7d":       "sum(increase(tkapi_request_duration_seconds_sum{$}[7d])) /sum(increase(tkapi_request_duration_seconds_count{$}[7d]))",
+	"sum_tkapi_request_1h":               "ceil(sum(increase(tkapi_request_total{$}[1h])))",
 	"p999_tkapi_request_latency":         "histogram_quantile(0.999, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1d])))",
 	"p95_tkapi_request_latency":          "histogram_quantile(0.95, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1d])))",
 	"p99_tkapi_request_latency":          "histogram_quantile(0.99, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1d])))",
