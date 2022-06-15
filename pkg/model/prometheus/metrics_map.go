@@ -17,7 +17,9 @@ var MetricsMap = map[string]string{
 	"p95_tkapi_request_latency":          "histogram_quantile(0.95, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1h])))",
 	"p99_tkapi_request_latency":          "histogram_quantile(0.99, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1h])))",
 	"upstream_msg":                       "sum(iothub_msg_total{direction='upstream',$})",                                                                                       // 上行消息数量
+	"upstream_msg_24h":                   "sum(increase(iothub_msg_total{direction='upstream',$})[24h])",                                                                        // 上行消息数量
 	"downstream_msg":                     "sum(iothub_msg_total{direction='downstream',$})",                                                                                     // 下行消息数量
+	"downstream_msg_24h":                 "sum(increase(iothub_msg_total{direction='downstream',$})[24h])",                                                                      // 下行消息数量
 	"subscribe_num":                      "(sum(subscribe_num{$})) / (count (sum by (pod) (subscribe_num)))",                                                                    // 订阅数
 	"subscribe_entities_num":             "sum(subscribe_entities_num{$}) / (count (sum by (pod) (subscribe_entities_num)))",                                                    // 订阅的实体数量
 	"rule_num":                           "sum(rule_num{$}) / (count (sum by (pod) (rule_num)))",                                                                                // 路由数量
