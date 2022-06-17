@@ -81,9 +81,6 @@ func parseDeploymentQuery(name, status, sortBy, ascending, limit, page string) m
 	if sortBy != "" {
 		q["sortBy"] = sortBy
 	}
-	if ascending != "" {
-		q["ascending"] = ascending
-	}
 	return q
 }
 

@@ -91,6 +91,8 @@ func (s *KSMetricsServer) MetricsPlugins(req *go_restful.Request, resp *go_restf
 				break
 			}
 		}
+		ksAddr, _ := s.ksSvc.PluginStatusAddr(resData.Items[i].Metadata.Name)
+		resData.Items[i].KSAddr = ksAddr
 	}
 	if req.QueryParameter("only_status") != "" {
 		resStatus := &PluginsOnlyStatus{Items: make([]PluginOnlyStatus, resData.TotalItems)}

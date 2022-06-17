@@ -39,6 +39,7 @@ type PluginStatus struct {
 type PluginItems struct {
 	Metadata PluginMetadata `json:"metadata"`
 	Status   PluginStatus   `json:"status"`
+	KSAddr   string         `json:"ks_addr"`
 }
 
 type PluginPods struct {
