@@ -23,7 +23,7 @@ var MetricsMap = map[string]string{
 	"subscribe_num":                      "(sum(subscribe_num{$})) / (count (sum by (pod) (subscribe_num)))",                                                                    // 订阅数
 	"subscribe_entities_num":             "sum(subscribe_entities_num{$}) / (count (sum by (pod) (subscribe_entities_num)))",                                                    // 订阅的实体数量
 	"rule_num":                           "sum(rule_num{$}) / (count (sum by (pod) (rule_num)))",                                                                                // 路由数量
-	"rule_execute_num_24h":               "sum(increase(rule_execute_num{$}[24h])) / (count (sum by (pod) (rule_num)))",                                                         // 24小时 规则执行数
+	"rule_execute_num_24h":               "sum(increase(rule_execute_num{$}[24h]))",                                                                                             // 24小时 规则执行数
 	"rate_rule_failure_24h":              "ceil((sum(rule_execute_num{status='failure',$}) / sum(rule_execute_num{$}))*100)",                                                    // 规则执行失败率
 	"num_rule_execute_failure":           "sum(rule_execute_num{status='failure',$})",                                                                                           // 规则执行失败数
 	"num_rule_execute_success":           "sum(rule_execute_num{status='success',$})",                                                                                           // 规则执行成功数
