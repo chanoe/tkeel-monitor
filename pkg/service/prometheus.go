@@ -240,15 +240,6 @@ func (s *PrometheusService) TKMeter(ctx context.Context, req *pb.TKMeterRequest)
 		}
 		metricsData.Query = req.Meter
 	} else {
-		if mprom.NeedTomorrowZeroEndTime(req.GetMeter()) {
-			d, _ := time.ParseDuration("24h")
-			tomorrow := time.Now().Add(d)
-			tomorrowLayout := tomorrow.Format("2006-01-02")
-			dayTime, pErr := time.Parse("2006-01-02", tomorrowLayout)
-			if pErr != nil {
-				et = dayTime
-			}
-		}
 		step, err1 := time.ParseDuration(req.GetStep())
 		if err1 != nil {
 			log.Errorf("time step parse err: %s", err1)
@@ -331,15 +322,6 @@ func (s *PrometheusService) BatchTKMeter(ctx context.Context, req *pb.TKMeterBat
 				if err != nil {
 					log.Error(err)
 					return
-				}
-				if mprom.NeedTomorrowZeroEndTime(qrys[i]) {
-					d, _ := time.ParseDuration("24h")
-					tomorrow := time.Now().Add(d)
-					tomorrowLayout := tomorrow.Format("2006-01-02")
-					dayTime, pErr := time.Parse("2006-01-02", tomorrowLayout)
-					if pErr != nil {
-						et = dayTime
-					}
 				}
 				value, warn, err := s.pAPI.QueryRange(ctx, expr, promv1cli.Range{
 					Start: st,
