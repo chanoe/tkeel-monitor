@@ -39,6 +39,19 @@ var MetricsMap = map[string]string{
 	"sum_iothub_connected":               "sum(iothub_connected_total{$})",                                                                                                      // 连接数
 	"sum_device_offline":                 "(sum(device_num_total{$}) / (count (sum by (pod) (device_num_total)))) - sum(iothub_connected_total{$})",                             // 离线设备数
 }
+var endTimeNeeded = map[string]struct{}{
+	"upstream_msg_24h":   {},
+	"downstream_msg_24h": {},
+	"subscribe_num":      {},
+	"msg_storage_days":   {},
+}
+
+func NeedTomorrowZeroEndTime(name string) bool {
+	if _, ok := endTimeNeeded[name]; ok {
+		return ok
+	}
+	return false
+}
 
 func ExpressFromMetricsMap(name, label string) (string, error) {
 	if v, ok := MetricsMap[name]; ok {
