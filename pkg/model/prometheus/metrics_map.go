@@ -31,7 +31,7 @@ var MetricsMap = map[string]string{
 	"rate_rule_execute_success_5m":       "rate(rule_execute_num{status='success',$}[5m])",                                                                                      // 成功的规则执行速率
 	"sum_device_num":                     "sum(device_num_total{$}) / (count (sum by (pod) (device_num_total)))",                                                                // 设备数量
 	"sum_template_num":                   "sum(device_template_total{$}) / (count (sum by (pod) (device_template_total)))",                                                      // 模板数量
-	"rate_online":                        "ceil((sum(iothub_connected_total{$}) / sum(device_num_total{$})) * 100)",                                                             // 在线率
+	"rate_online":                        "ceil((sum(iothub_device_status{$}) / sum(device_num_total{$})) * 100)",                                                               // 在线率
 	"msg_storage_days":                   "((sum(msg_storage_seconds{tenant_id='admin'})) / (count (sum by (pod) (msg_storage_seconds)))) / 86400",                              // 消息存储天数
 	"msg_storage_space_unused_bytes":     "(sum(msg_storage_space{space_type='total'})-sum( msg_storage_space{space_type='used'} ))/(count (sum by (pod) (msg_storage_space)))", // 消息存储可用空间
 	"msg_storage_space_usage_percentage": "ceil((sum(msg_storage_space{space_type='used'}) / sum(msg_storage_space{space_type='total'}))*100)",                                  // 消息存储空间使用占比
