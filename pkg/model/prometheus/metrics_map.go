@@ -36,7 +36,7 @@ var MetricsMap = map[string]string{
 	"msg_storage_space_unused_bytes":     "(sum(msg_storage_space{space_type='total'})-sum( msg_storage_space{space_type='used'} ))/(count (sum by (pod) (msg_storage_space)))", // 消息存储可用空间
 	"msg_storage_space_usage_percentage": "ceil((sum(msg_storage_space{space_type='used'}) / sum(msg_storage_space{space_type='total'}))*100)",                                  // 消息存储空间使用占比
 	"core_msg_days":                      "ceil(sum(increase(core_msg_total{$}[1d])))",                                                                                          // 日消息量
-	"sum_iothub_connected":               "sum(iothub_connected_total{$})",                                                                                                      // 连接数
+	"sum_iothub_connected":               "sum(iothub_device_status{$})",                                                                                                        // 连接数
 	"sum_device_offline":                 "(sum(device_num_total{$}) / (count (sum by (pod) (device_num_total)))) - sum(iothub_connected_total{$})",                             // 离线设备数
 }
 
