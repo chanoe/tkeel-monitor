@@ -26,7 +26,7 @@ service Openapi {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary : "openapi identify"
       operation_id : "Identify"
-      tags : "Openapi"
+      tags: ["Openapi","Internal"]
       responses : {
         key : "200"
         value : {description : "OK"}
@@ -50,7 +50,7 @@ service Openapi {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary : "openapi addons identify"
       operation_id : "Identify"
-      tags : "Openapi"
+      tags: ["Openapi","Internal"]
       responses : {
         key : "200"
         value : {description : "OK"}
@@ -69,7 +69,7 @@ service Openapi {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary : "openapi tenant enable"
       operation_id : "TenantEnable"
-      tags : "Openapi"
+      tags: ["Openapi","Internal"]
       responses : {
         key : "200"
         value : {description : "OK"}
@@ -87,7 +87,7 @@ service Openapi {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary : "openapi tenant disable"
       operation_id : "TenantDisable"
-      tags : "Openapi"
+      tags: ["Openapi","Internal"]
       responses : {
         key : "200"
         value : {description : "OK"}
@@ -104,7 +104,7 @@ service Openapi {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary : "openapi status"
       operation_id : "Status"
-      tags : "Openapi"
+      tags: ["Openapi","Internal"]
       responses : {
         key : "200"
         value : {description : "OK"}
