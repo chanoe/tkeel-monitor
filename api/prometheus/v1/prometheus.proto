@@ -19,7 +19,7 @@ service Prometheus {
       get : "/prometheus/query"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary : "query promehteus"
+      summary : "prometheus 单个指标查询(query==原始 PromQl)"
       operation_id : "Query"
       tags : "Prometheus"
       responses : {
@@ -34,8 +34,8 @@ service Prometheus {
       get : "/prometheus/batch_query"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary : "batch query promehteus"
-      operation_id : "Query"
+      summary : "prometheus 多个指标查询(query==原始 PromQl)"
+      operation_id : "BatchQuery"
       tags : "Prometheus"
       responses : {
         key : "200"
@@ -49,7 +49,7 @@ service Prometheus {
       get : "/prometheus/tkmeter"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary : "query promehteus by tkeel meter"
+      summary : "prometheus 单个指标查询(query==tkeel自定义指标)"
       operation_id : "TKMeter"
       tags : "Prometheus"
       responses : {
@@ -64,7 +64,7 @@ service Prometheus {
       get : "/prometheus/batch_tkmeter"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-      summary : "query promehteus by tkeel meter"
+      summary : "prometheus 多个指标查询(query==tkeel自定义指标)"
       operation_id : "TKMeterBatch"
       tags : "Prometheus"
       responses : {
@@ -80,31 +80,31 @@ service Prometheus {
 message QueryRequest {
   string query = 1 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "query filed"
+      description : "查询语句"
     },
     (google.api.field_behavior) = REQUIRED
   ];
   int64 st = 2 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "start_time"
+      description : "起始时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   int64 et = 3 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "end_time"
+      description : "截止时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string step = 4 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "time step"
+      description : "步长(单位 ms/s/h 等)"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string tenant_id = 5 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "tenant_id"
+      description : "租户ID"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
@@ -114,7 +114,7 @@ message QueryRequest {
 message QueryResponse {
   MetricsData result = 1
   [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-    description : "Hello Response"
+    description : "指标数据"
   } ];
 }
 
@@ -122,31 +122,31 @@ message QueryResponse {
 message BatchQueryRequest {
   string query = 1 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "query filed,multi query splited with '|' "
+      description : "查询语句，多个查询语句用 | 隔开"
     },
     (google.api.field_behavior) = REQUIRED
   ];
   int64 st = 2 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "start_time"
+      description : "起始时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   int64 et = 3 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "end_time"
+      description : "结束时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string step = 4 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "time step"
+      description : "步长"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string tenant_id = 5 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "tenant_id"
+      description : "租户ID"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
@@ -156,7 +156,7 @@ message BatchQueryRequest {
 message BatchQueryResponse {
   repeated MetricsData results = 1
   [ (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-    description : "Hello Response"
+    description : "指标数据"
   } ];
 }
 
@@ -164,31 +164,31 @@ message BatchQueryResponse {
 message TKMeterRequest{
   string meter = 1 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "meter name"
+      description : "自定义指标名字"
     },
     (google.api.field_behavior) = REQUIRED
   ];
   int64 st = 2 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "start_time"
+      description : "起始时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   int64 et = 3 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "end_time"
+      description : "结束时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string step = 4 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "time step"
+      description : "步长"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string tenant_id = 5 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "tenant_id"
+      description : "租户ID"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
@@ -198,31 +198,31 @@ message TKMeterRequest{
 message TKMeterBatchRequest {
   string meters = 1 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "query tkeel meters ,multi meters splited with '|' "
+      description : "自定义指标，多个用 | 隔开"
     },
     (google.api.field_behavior) = REQUIRED
   ];
   int64 st = 2 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "start_time"
+      description : "起始时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   int64 et = 3 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "end_time"
+      description : "结束时间戳"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string step = 4 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "time step"
+      description : "步长"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
   string tenant_id = 5 [
     (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
-      description : "tenant_id"
+      description : "租户ID"
     },
     (google.api.field_behavior) = OPTIONAL
   ];
