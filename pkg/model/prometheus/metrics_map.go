@@ -38,6 +38,7 @@ var MetricsMap = map[string]string{
 	"core_msg_days":                      "ceil(sum(increase(core_msg_total{$}[1d])))",                                                                                                         // 日消息量
 	"sum_iothub_connected":               "sum(iothub_device_status{$})",                                                                                                                       // 连接数
 	"sum_device_offline":                 "(sum(device_num_total{$}) / (count (sum by (pod) (device_num_total)))) - (sum(device_online_total{$})/ count (sum by (pod) (device_online_total)))", // 离线设备数
+	"sum_device_online":                  "(sum(device_online_total{$})/ count (sum by (pod) (device_online_total)))",
 }
 
 func ExpressFromMetricsMap(name, label string) (string, error) {
