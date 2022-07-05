@@ -39,6 +39,7 @@ var MetricsMap = map[string]string{
 	"sum_iothub_connected":               "sum(iothub_device_status{$})",                                                                                                                       // 连接数
 	"sum_device_offline":                 "(sum(device_num_total{$}) / (count (sum by (pod) (device_num_total)))) - (sum(device_online_total{$})/ count (sum by (pod) (device_online_total)))", // 离线设备数
 	"sum_device_online":                  "(sum(device_online_total{$})/ count (sum by (pod) (device_online_total)))",
+	"alarm_level_overview":               "sum by (tenant_id,alarm_level) (alarm_level_total{$})",
 }
 
 func ExpressFromMetricsMap(name, label string) (string, error) {
