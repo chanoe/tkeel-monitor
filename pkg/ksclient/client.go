@@ -38,7 +38,7 @@ func NewKApisClient(opts ...Option) *KApisClient {
 	for _, opt := range opts {
 		opt(c)
 	}
-
+	c.SecretTokenBeforeReq(nil, &resty.Request{})
 	return c
 }
 
