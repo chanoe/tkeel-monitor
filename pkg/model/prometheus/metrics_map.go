@@ -13,9 +13,9 @@ var MetricsMap = map[string]string{
 	"avg_tkapi_request_latency_24h":      "sum(increase(tkapi_request_duration_seconds_sum{$}[24h])) /sum(increase(tkapi_request_duration_seconds_count{$}[24h]))",
 	"sum_tkapi_request_1h":               "ceil(sum(increase(tkapi_request_total{$}[1h])))",
 	"num_tkapi_request":                  "sum((tkapi_request_total{$}))",
-	"p999_tkapi_request_latency":         "histogram_quantile(0.999, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1h])))",
-	"p95_tkapi_request_latency":          "histogram_quantile(0.95, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1h])))",
-	"p99_tkapi_request_latency":          "histogram_quantile(0.99, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[1h])))",
+	"p999_tkapi_request_latency":         "histogram_quantile(0.999, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[5m])))",
+	"p95_tkapi_request_latency":          "histogram_quantile(0.95, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[5m])))",
+	"p99_tkapi_request_latency":          "histogram_quantile(0.99, sum by (le) (rate(tkapi_request_duration_seconds_bucket{$}[5m])))",
 	"upstream_msg":                       "sum(iothub_msg_total{direction='upstream',$})",                                                                                                      // 上行消息数量
 	"upstream_msg_24h":                   "ceil(sum(increase(iothub_msg_total{direction='upstream',$}[24h])))",                                                                                 // 上行消息数量
 	"downstream_msg":                     "sum(iothub_msg_total{direction='downstream',$})",                                                                                                    // 下行消息数量
