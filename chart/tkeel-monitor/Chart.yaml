@@ -1,6 +1,6 @@
 apiVersion: v2
 name: tkeel-monitor
-description: tkeel monitor backend.
+description: 服务监控与用量统计
 
 # A chart can be either an 'application' or a 'library' chart.
 #
