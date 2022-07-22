@@ -20,4 +20,4 @@ imagePullSecrets: ""
 image:
   repository: tkeelio/tkeel-monitor
   # tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
